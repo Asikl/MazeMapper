@@ -104,7 +104,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string) ([]Tra
 
 			switch msg.Rcode {
 			case 0:
-				fmt.Println("NOERROR")
+				//fmt.Println("NOERROR")
 				Cache.AddERROR0()
 			case 1:
 				fmt.Println("出现错误  格式错误")
@@ -138,7 +138,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string) ([]Tra
 			//fmt.Println("我想要的东西", msg.Answer)
 
 			if len(msg.Answer) == 0 {
-				fmt.Println("==================================")
+				//fmt.Println("==================================")
 				servers = servers[:0]
 				for _, value := range msg.Extra { //通过range可以直接得到数组元素
 					//把A记录记起来，准备递归查询
@@ -158,7 +158,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string) ([]Tra
 						//return responses, nil
 					}
 				}
-				fmt.Println("MSG======:", msg)
+				//fmt.Println("MSG======:", msg)
 
 				//处理NS记录不附带IP的情况
 				if len(servers) == 0 {
@@ -171,7 +171,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string) ([]Tra
 							NsNotGlueIP = append(NsNotGlueIP, ns.Ns)
 						}
 					}
-					fmt.Println("NSNOTGLUEIP%%%%%%%%%%%%%%", NsNotGlueIP)
+					fmt.Println("NSNOTGLUEIP", NsNotGlueIP)
 
 					//====================把NS不带IP的记录也放到缓存里面
 					var cachevalue Cache.Cachevalue
@@ -248,7 +248,6 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string) ([]Tra
 							}
 							d.Resolver(domain, dns.TypeA, value)
 						}
-
 						return nil, nil
 						//return nil, nil
 						//DEBUG
@@ -277,7 +276,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string) ([]Tra
 				}
 
 				// fmt.Println("XXXXXXXXXXXXXXXXX",serv)
-				fmt.Println("Servers查BUG", servers)
+				//fmt.Println("Servers查BUG", servers)
 				for _, value := range servers {
 					//fmt.Println("递归查询：", index)
 					//递归查询
@@ -285,7 +284,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string) ([]Tra
 				}
 				return nil, nil
 			} else {
-				fmt.Println("*****************************************")
+				//fmt.Println("*****************************************")
 				//fmt.Println("msg.Authoritative RESPONSE  TRUE", responses)
 				var tempvalue Cache.Cachevalue
 				//tempvalue.IP = R
@@ -356,7 +355,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string) ([]Tra
 						// return responses, nil
 					}
 				}
-				fmt.Println("------------------------------------Return")
+				//fmt.Println("------------------------------------Return")
 				return responses, nil
 			}
 		}
@@ -476,7 +475,7 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string) ([]T
 
 			switch msg.Rcode {
 			case 0:
-				fmt.Println("NOERROR")
+				//fmt.Println("NOERROR")
 				Cache.AddERROR0()
 			case 1:
 				fmt.Println("出现错误  格式错误")
@@ -510,7 +509,7 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string) ([]T
 			//fmt.Println("我想要的东西", msg.Answer)
 
 			if len(msg.Answer) == 0 {
-				fmt.Println("==================================")
+				//fmt.Println("==================================")
 				servers = servers[:0]
 				for _, value := range msg.Extra { //通过range可以直接得到数组元素
 					//把A记录记起来，准备递归查询
@@ -530,7 +529,7 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string) ([]T
 						//return responses, nil
 					}
 				}
-				fmt.Println("MSG======:", msg)
+				//fmt.Println("MSG======:", msg)
 
 				//处理NS记录不附带IP的情况
 				if len(servers) == 0 {
@@ -544,7 +543,7 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string) ([]T
 
 						}
 					}
-					fmt.Println("NSNOTGLUEIP%%%%%%%%%%%%%%", NsNotGlueIP)
+					fmt.Println("NSNOTGLUEIP", NsNotGlueIP)
 
 					//====================把NS不带IP的记录也放到缓存里面
 					var cachevalue Cache.Cachevalue
@@ -563,7 +562,7 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string) ([]T
 						}
 					}
 					//用于DEBUG
-					fmt.Println("成功插入cache")
+					//fmt.Println("成功插入cache")
 					//fmt.Println("打印cache", cacheFIX)
 
 					//完全没有NS记录，无法继续进行查询
@@ -592,9 +591,7 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string) ([]T
 							}
 
 						}
-
 						//serverstemp, _ := d.TraceIP(NsNotGlueIP[0])
-
 						//把解析得到的IP供之前的查询继续进行下去
 						//把解析得到的IP供之前的查询继续进行下去
 
@@ -646,12 +643,12 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string) ([]T
 					}
 					Cache.Add(domain, server, dns.TypeA, tempvalue)
 					//用于DEBUG
-					fmt.Println("成功插入cache")
+					//fmt.Println("成功插入cache")
 					//fmt.Println("打印cache", cacheFIX)
 				}
 
 				// fmt.Println("XXXXXXXXXXXXXXXXX",serv)
-				fmt.Println("Servers查BUG", servers)
+				//fmt.Println("Servers查BUG", servers)
 				for _, value := range servers {
 					//fmt.Println("递归查询：", index)
 					//递归查询
@@ -659,7 +656,7 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string) ([]T
 				}
 				return nil, nil
 			} else {
-				fmt.Println("*****************************************")
+				//fmt.Println("*****************************************")
 				//fmt.Println("msg.Authoritative RESPONSE  TRUE", responses)
 				var tempvalue Cache.Cachevalue
 				//tempvalue.IP = R
@@ -732,7 +729,7 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string) ([]T
 						// return responses, nil
 					}
 				}
-				fmt.Println("------------------------------------Return")
+				//fmt.Println("------------------------------------Return")
 				return responses, nil
 			}
 		}

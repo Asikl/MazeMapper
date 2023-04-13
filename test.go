@@ -42,6 +42,8 @@ func main() {
 	DrawGraph.Visual()
 	//DrawGraph.Test()
 	fmt.Println("+++")
+	Graph.DumpGraphReverse()
+	DrawGraph.Visual1()
 	// DrawPicture.DrawGraph()
 	// fmt.Println("没有错误查询数量：", Cache.GetERROR0())
 	// fmt.Println("格式错误：", Cache.GetERROR1())

@@ -36,6 +36,7 @@ type Value struct {
 
 var Num int
 var GraphMap = make(map[Key]Value, 0)
+var GraphReverse = make(map[int]Key, 0)
 var Domaingraph = graph.New(1000)
 
 // Map[domain] graph
@@ -46,10 +47,13 @@ func Init() {
 	var Beginkey Key
 	var BeginValue Value
 
-	Beginkey.Domain = "Begin"
+	Beginkey.Domain = ""
 	BeginValue.ID = 0
 	//先插入一个开始节点
 	GraphMap[Beginkey] = BeginValue
+
+	GraphReverse[0] = Beginkey
+
 	Num = 0
 }
 
@@ -77,7 +81,6 @@ func Getflag(domain string, Qtype uint16, Ip string) (flag int) {
 	key.Domain = domain
 	key.Qtype = Qtype
 	key.Ip = Ip
-
 	if value, ok := GraphMap[key]; ok {
 		return value.flag
 	} else {
@@ -128,6 +131,7 @@ func NodeNum(domain string, Qtype uint16, Ip string) (Nodenum int, flag bool) {
 		value.ID = GetNum()
 		//fmt.Println("value.IDKKKKKKKKKKKKK", GetNum(), value.ID)
 
+		GraphReverse[value.ID] = temp
 		value.flag = 0 //该节点未访问
 		GraphMap[temp] = value
 		return value.ID, false
@@ -141,4 +145,8 @@ func Dump() {
 
 func DumpGraphMap() {
 	fmt.Println("把图输出", GraphMap)
+}
+
+func DumpGraphReverse() {
+	fmt.Println("把逆图输出", GraphReverse)
 }
