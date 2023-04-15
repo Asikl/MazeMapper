@@ -24,6 +24,17 @@ const (
 	LeaveAAAA      = 11
 	LeaveCNAME     = 12
 	Common         = 100
+
+	CorruptNode        = 980
+	ServerfailureNode  = 981
+	NameErrorNode      = 982
+	NotImplementedNode = 983
+	RefusedNode        = 984
+	TimeoutNode        = 985
+	NoNsrecordNode     = 986
+	NsNotGlueIPNode    = 987
+	IPerrorNode        = 988
+	IDMisMatcNode      = 989
 )
 
 type GraphStruct struct {

@@ -17,13 +17,20 @@ func Test() {
 	fmt.Println("TESTTESTTEST")
 }
 
+type DrawStruct struct {
+	path string
+}
+
 func Visual(domain string, kk *Graph.GraphStruct) {
 	fmt.Println("开始画图")
 	// // // 创建一个有向图
+
+	//Path := "\"DomainPicture\""
 	g := kk.Domaingraph
 	// 将有向图导出为 Dot 格式的图形描述
 	dot := "digraph G {\n"
 	// 遍历节点
+
 	for v := 0; v < g.Order(); v++ {
 		// if v > Graph.Num {
 		// 	break
@@ -31,7 +38,14 @@ func Visual(domain string, kk *Graph.GraphStruct) {
 		//fmt.Print(v, " -> ")
 		aborted := graph.Sort(g).Visit(v, func(w int, c int64) (skip bool) {
 			//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
-			dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+
+			if w == Graph.RefusedNode {
+				str := "Refused"
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+			} else {
+				dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+			}
+			//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
 			//fmt.Print(w, "  ")
 			return
 		})
@@ -44,6 +58,7 @@ func Visual(domain string, kk *Graph.GraphStruct) {
 	//fmt.Println(dot)
 	// 创建一个文件，将 Dot 格式的图形描述写入该文件
 	//fmt.Println("Hello")
+
 	str := domain + "directed_graph.dot"
 	strr := domain + "directed_graph.png"
 	fmt.Println(str, strr)
@@ -83,6 +98,7 @@ func Visual1(domain string, kk *Graph.GraphStruct) {
 		//fmt.Print(v, " -> ")
 		aborted := graph.Sort(g).Visit(v, func(w int, c int64) (skip bool) {
 			//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+
 			dot += fmt.Sprintf("\t \"%d\" -> \"%d\";\n", kk.GraphReverse[v], kk.GraphReverse[w])
 			//fmt.Print(w, "  ")
 			return

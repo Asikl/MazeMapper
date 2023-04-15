@@ -126,6 +126,19 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				return nil, nil
 			case 5:
 				fmt.Println("出现错误  Refused")
+
+				nodenum, flag := gg.NodeNum(gg.Domain, dns.TypeA, server)
+				if flag {
+					//fmt.Println("两个节点图里面都有了")
+					gg.AddNode(nodenum, Graph.RefusedNode)
+					continue
+				} else {
+					//fmt.Println("只有一个节点图里面有")
+					gg.AddNode(nodenum, Graph.RefusedNode)
+				}
+
+				fmt.Println(domain, server)
+
 				gg.Setflag(domain, msgType, server, Graph.Refused)
 				Cache.AddERROR5()
 				return nil, nil
@@ -137,6 +150,20 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 			if len(msg.Answer) == 0 {
 				//fmt.Println("==================================")
 				servers = servers[:0]
+				if len(msg.Extra) <= 1 {
+
+					fmt.Println("没有NS记录XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+					nodenum, flag := gg.NodeNum(gg.Domain, dns.TypeA, server)
+					if flag {
+						//fmt.Println("两个节点图里面都有了")
+						gg.AddNode(nodenum, 999)
+						continue
+					} else {
+						//fmt.Println("只有一个节点图里面有")
+						gg.AddNode(nodenum, 999)
+					}
+					return nil, nil
+				}
 				for _, value := range msg.Extra { //通过range可以直接得到数组元素
 					//把A记录记起来，准备递归查询
 					if value.Header().Rrtype == dns.TypeA {

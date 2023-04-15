@@ -40,7 +40,7 @@ func Total(domain string, sy *sync.WaitGroup) {
 	gg.DumpGraphMap()
 	fmt.Println("----")
 	DrawGraph.Visual(domain, &gg)
-	//DrawGraph.Visual1(domain, gg)
+	//DrawGraph.Visual1(domain, &gg)
 	//DrawGraph.Test()
 	fmt.Println("+++")
 	//Graph.DumpGraphReverse()
@@ -70,9 +70,10 @@ func main() {
 	//fmt.Scanf("%s", &domain)
 	var wg sync.WaitGroup
 
-	wg.Add(3)
-	var domain = [...]string{"www.baidu.com", "eamis.nankai.edu.cn", "69guy.net"}
-
+	//wg.Add(3)
+	//var domain = [...]string{"www.baidu.com", "eamis.nankai.edu.cn", "69guy.net"}
+	var domain = [...]string{"69guy.net"}
+	wg.Add(len(domain))
 	for _, value := range domain {
 		fmt.Println("协程", value)
 		go Total(value, &wg)
