@@ -8,6 +8,32 @@ import (
 	"github.com/yourbasic/graph"
 )
 
+const (
+	NoVisit        = 0
+	Corrupt        = 1
+	Serverfailure  = 2
+	NameError      = 3
+	NotImplemented = 4
+	Refused        = 5
+	Timeout        = 6
+	NoNsrecord     = 7
+	NsNotGlueIP    = 71
+	IPerror        = 8
+	IDMisMatch     = 9
+	LeaveA         = 10
+	LeaveAAAA      = 11
+	LeaveCNAME     = 12
+	Common         = 100
+)
+
+type GraphStruct struct {
+	Domain       string
+	Num          int
+	GraphMap     map[Key]Value
+	GraphReverse map[int]Key
+	Domaingraph  *graph.Mutable
+}
+
 type Key struct {
 	Domain string
 	Ip     string // compatible with ipv4/ipv6, could be a user-defined ip type
@@ -15,73 +41,72 @@ type Key struct {
 }
 
 type Value struct {
-	ID       int
-	Nodetype int //标记节点状态，timeout,Corrupt等等
-	//Corrupt 格式错误 1
-	//Server failure 2
-	//Name Error 3
-	//Not Implemented 4
-	//Refused 5
-	//timeout 6   发不过去61     收不过来62          根本无法建立连接63
-	//数据包中没有NS记录，无法继续进行下去 7
-	//目标IP有问题 8
-	//发的数据包和收到的数据包ID不匹配  9
-	//正常节点  100
-
-	//叶子节点 50  A
-	//叶子节点 51  AAAA
-	//叶子节点 52  CNAME
+	ID   int
 	flag int //标记该节点访问了没，以及该节点的状态
 }
 
-var Num int
-var GraphMap = make(map[Key]Value, 0)
-var GraphReverse = make(map[int]Key, 0)
-var Domaingraph = graph.New(1000)
+type DomainGraph struct {
+	Num          int //图中节点的序号
+	GraphMap     map[Key]Value
+	GraphReverse map[int]Key
+}
+
+// var Num int
+// var GraphMap = make(map[Key]Value, 0)
+// var GraphReverse = make(map[int]Key, 0)
+// var Domaingraph = graph.New(1000)
 
 // Map[domain] graph
 // Map[domain] id
 // Hash domain ip qtype
 
-func Init() {
+func Init(g *GraphStruct, Domain string) {
 	var Beginkey Key
 	var BeginValue Value
+	g.Domain = Domain
+	g.GraphMap = make(map[Key]Value, 0)
+	g.GraphReverse = make(map[int]Key, 0)
+	g.Domaingraph = graph.New(1000)
 
 	Beginkey.Domain = ""
 	BeginValue.ID = 0
 	//先插入一个开始节点
-	GraphMap[Beginkey] = BeginValue
-
-	GraphReverse[0] = Beginkey
-
-	Num = 0
+	g.GraphMap[Beginkey] = BeginValue
+	g.GraphReverse[0] = Beginkey
+	g.Num = 0
 }
 
-func AddNum() {
+// 获取 Domaingraph 字段的值的方法
+func (g *GraphStruct) GetDomaingraph() *graph.Mutable {
+	return g.Domaingraph
+}
+
+func (g *GraphStruct) AddNum() {
 	//图中节点的个数+1
-	Num++
+	g.Num++
 }
 
-func SubNum() {
+func (g *GraphStruct) SubNum() {
 	//图中节点的个数+1
-	Num--
+	g.Num--
 }
-func GetNum() (num int) {
+func (g *GraphStruct) GetNum() (num int) {
 	//图中节点的个数+1
-	return Num
+	return g.Num
 }
 
-func AddNode(num1 int, num2 int) {
+func (g *GraphStruct) AddNode(num1 int, num2 int) {
+	//fmt.Println("在图中插入节点", num1, num2)
 	Cache.AddEdge(1)
-	Domaingraph.Add(num1, num2) //Add inserts a directed edge from v to w with zero cost. It removes the previous cost if this edge already exists.
+	g.Domaingraph.Add(num1, num2) //Add inserts a directed edge from v to w with zero cost. It removes the previous cost if this edge already exists.
 }
 
-func Getflag(domain string, Qtype uint16, Ip string) (flag int) {
+func (g *GraphStruct) Getflag(domain string, Qtype uint16, Ip string) (flag int) {
 	var key Key
 	key.Domain = domain
 	key.Qtype = Qtype
 	key.Ip = Ip
-	if value, ok := GraphMap[key]; ok {
+	if value, ok := g.GraphMap[key]; ok {
 		return value.flag
 	} else {
 		return 0 //没有该节点暂时认为是为访问状态
@@ -89,30 +114,28 @@ func Getflag(domain string, Qtype uint16, Ip string) (flag int) {
 	//return GraphMap[key].flag
 }
 
-func SetNodetype(domain string, Qtype uint16, Ip string, Nodetype int) {
+// func SetNodetype(domain string, Qtype uint16, Ip string, Nodetype int) {
+// 	var temp Key
+// 	temp.Domain = domain
+// 	temp.Ip = Ip
+// 	temp.Qtype = Qtype
+// 	Value := GraphMap[temp]
+// 	Value.Nodetype = Nodetype
+// 	GraphMap[temp] = Value
+// }
+
+func (g *GraphStruct) Setflag(domain string, Qtype uint16, Ip string, flag int) {
 	var temp Key
 	temp.Domain = domain
 	temp.Ip = Ip
 	temp.Qtype = Qtype
-	Value := GraphMap[temp]
-	Value.Nodetype = Nodetype
-	GraphMap[temp] = Value
-
-}
-
-func Setflag(domain string, Qtype uint16, Ip string, flag int) {
-	var temp Key
-	temp.Domain = domain
-	temp.Ip = Ip
-	temp.Qtype = Qtype
-	Value := GraphMap[temp]
+	Value := g.GraphMap[temp]
 	Value.flag = flag
-	GraphMap[temp] = Value
-
+	g.GraphMap[temp] = Value
 	//GraphMap[temp].flag = flag
 }
 
-func NodeNum(domain string, Qtype uint16, Ip string) (Nodenum int, flag bool) {
+func (g *GraphStruct) NodeNum(domain string, Qtype uint16, Ip string) (Nodenum int, flag bool) {
 	var Nodeint int
 	var temp Key
 	temp.Domain = domain
@@ -120,33 +143,33 @@ func NodeNum(domain string, Qtype uint16, Ip string) (Nodenum int, flag bool) {
 	temp.Qtype = Qtype
 	//记录总边的个数  Edge++
 
-	if value, ok := GraphMap[temp]; ok {
+	if value, ok := g.GraphMap[temp]; ok {
 		Nodeint = value.ID
 		//fmt.Println("图中已有该节点，只需要加一条边")
 		return Nodeint, true
 	} else {
 		//fmt.Println("图中没有该节点，需要加一个点")
 		var value Value
-		AddNum()
-		value.ID = GetNum()
+		g.AddNum()
+		value.ID = g.GetNum()
 		//fmt.Println("value.IDKKKKKKKKKKKKK", GetNum(), value.ID)
 
-		GraphReverse[value.ID] = temp
+		g.GraphReverse[value.ID] = temp
 		value.flag = 0 //该节点未访问
-		GraphMap[temp] = value
+		g.GraphMap[temp] = value
 		return value.ID, false
 	}
 }
 
-func Dump() {
-	fmt.Println("把图输出", Domaingraph)
+func (g *GraphStruct) Dump() {
+	fmt.Println("把图输出", g.Domaingraph)
 
 }
 
-func DumpGraphMap() {
-	fmt.Println("把图输出", GraphMap)
+func (g *GraphStruct) DumpGraphMap() {
+	fmt.Println("把图输出", g.GraphMap)
 }
 
-func DumpGraphReverse() {
-	fmt.Println("把逆图输出", GraphReverse)
+func (g *GraphStruct) DumpGraphReverse() {
+	fmt.Println("把逆图输出", g.GraphReverse)
 }

@@ -17,10 +17,10 @@ func Test() {
 	fmt.Println("TESTTESTTEST")
 }
 
-func Visual() {
+func Visual(domain string, kk *Graph.GraphStruct) {
 	fmt.Println("开始画图")
 	// // // 创建一个有向图
-	g := Graph.Domaingraph
+	g := kk.Domaingraph
 	// 将有向图导出为 Dot 格式的图形描述
 	dot := "digraph G {\n"
 	// 遍历节点
@@ -44,7 +44,10 @@ func Visual() {
 	//fmt.Println(dot)
 	// 创建一个文件，将 Dot 格式的图形描述写入该文件
 	//fmt.Println("Hello")
-	file, err := os.Create("directed_graph.dot")
+	str := domain + "directed_graph.dot"
+	strr := domain + "directed_graph.png"
+	fmt.Println(str, strr)
+	file, err := os.Create(str)
 	if err != nil {
 		log.Fatal(err)
 		fmt.Println(err)
@@ -58,7 +61,7 @@ func Visual() {
 	fmt.Println("已生成 directed_graph.dot 文件")
 
 	// 使用 Graphviz 将 Dot 文件渲染为图像
-	cmd := exec.Command("dot", "-Tpng", "directed_graph.dot", "-o", "directed_graph.png")
+	cmd := exec.Command("dot", "-Tpng", str, "-o", strr)
 	err = cmd.Run()
 	if err != nil {
 		log.Fatal(err)
@@ -66,10 +69,10 @@ func Visual() {
 	fmt.Println("已生成 directed_graph.png 图片")
 }
 
-func Visual1() {
+func Visual1(domain string, kk *Graph.GraphStruct) {
 	fmt.Println("开始画图")
 	// // // 创建一个有向图
-	g := Graph.Domaingraph
+	g := kk.Domaingraph
 	// 将有向图导出为 Dot 格式的图形描述
 	dot := "digraph G {\n"
 	// 遍历节点
@@ -80,7 +83,7 @@ func Visual1() {
 		//fmt.Print(v, " -> ")
 		aborted := graph.Sort(g).Visit(v, func(w int, c int64) (skip bool) {
 			//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
-			dot += fmt.Sprintf("\t \"%d\" -> \"%d\";\n", Graph.GraphReverse[v], Graph.GraphReverse[w])
+			dot += fmt.Sprintf("\t \"%d\" -> \"%d\";\n", kk.GraphReverse[v], kk.GraphReverse[w])
 			//fmt.Print(w, "  ")
 			return
 		})

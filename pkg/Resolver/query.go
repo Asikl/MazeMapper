@@ -33,7 +33,7 @@ func newMsg(Type uint16, domain string) *dns.Msg {
 func (d *Dig) Exchange(m *dns.Msg) (msg1 *dns.Msg, err1 error, num int) {
 	var msg *dns.Msg
 	var err error
-	for i := 0; i < d.SetRetry(1); i++ {
+	for i := 0; i < d.SetRetry(3); i++ {
 		msg, err, num = d.exchange(context.TODO(), m) //TODO返回一个空的context，todo 通常用在并不知道传递什么 context的情形
 		if err == nil {
 			return msg, err, num
