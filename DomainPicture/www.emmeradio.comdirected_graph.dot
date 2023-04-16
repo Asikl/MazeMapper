@@ -51,8 +51,8 @@ digraph G {
 	1 -> 25;
 	1 -> 26;
 	1 -> 27;
-	2 -> "NameError";
-NameError [color=red];
+	2 -> "Timeout";
+Timeout [color=red];
 	3 -> "NameError";
 NameError [color=red];
 	4 -> "NameError";

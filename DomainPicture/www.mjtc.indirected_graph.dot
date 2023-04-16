@@ -1642,8 +1642,8 @@ digraph G {
 121 [color=blue];
 	122 -> "121";
 121 [color=blue];
-	123 -> "121";
-121 [color=blue];
+	123 -> "Timeout";
+Timeout [color=red];
 	124 -> 125;
 	124 -> 126;
 	124 -> 127;
@@ -2268,12 +2268,8 @@ digraph G {
 172 [color=blue];
 	163 -> "173";
 173 [color=blue];
-	164 -> "171";
-171 [color=blue];
-	164 -> "172";
-172 [color=blue];
-	164 -> "173";
-173 [color=blue];
+	164 -> "Timeout";
+Timeout [color=red];
 	165 -> "171";
 171 [color=blue];
 	165 -> "172";
@@ -3645,10 +3641,8 @@ digraph G {
 	227 -> 251;
 	227 -> 252;
 	227 -> 253;
-	228 -> "43";
-43 [color=yellow];
-	228 -> "44";
-44 [color=yellow];
+	228 -> "Timeout";
+Timeout [color=red];
 	229 -> "43";
 43 [color=yellow];
 	229 -> "44";

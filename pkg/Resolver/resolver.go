@@ -82,23 +82,24 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 			switch num {
 			case 100: //正常节点
 				gg.Setflag(domain, msgType, server, Graph.Common)
-			// case 61:
-			// 	gg.Setflag(domain, msgType, server, Graph.Timeout)
-			// 	nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
-			// 	gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
-			// 	gg.AddNode(nodenum, Graph.TimeoutNode)
-			// 	fmt.Println(domain, server)
-			// case 62:
-			// 	gg.Setflag(domain, msgType, server, Graph.Timeout)
-			// 	nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
-			// 	gg.AddNode(nodenum, Graph.TimeoutNode)
-			// 	gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
-			// case 63:
-			// 	gg.Setflag(domain, msgType, server, Graph.Timeout)
-			// 	nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
-			// 	gg.AddNode(nodenum, Graph.TimeoutNode)
-			// 	fmt.Println("TIMEOUT!!!")
-			// 	gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
+			case 61:
+				gg.Setflag(domain, msgType, server, Graph.Timeout)
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
+				gg.AddNode(nodenum, Graph.TimeoutNode)
+				fmt.Println(domain, server)
+			case 62:
+				gg.Setflag(domain, msgType, server, Graph.Timeout)
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
+				gg.AddNode(nodenum, Graph.TimeoutNode)
+			case 63:
+				gg.Setflag(domain, msgType, server, Graph.Timeout)
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
+				gg.AddNode(nodenum, Graph.TimeoutNode)
+				fmt.Println("TIMEOUT!!!")
+				gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
 			case 9:
 				gg.Setflag(domain, msgType, server, Graph.IDMisMatch)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
@@ -109,12 +110,12 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 			//Graph.Setflag(domain, msgType, server, 1) //节点标记为已访问
 			if err != nil {
 				cc.AddERROR6()
-				fmt.Println("出现错误  ", fmt.Errorf("%v", err))
+				//fmt.Println("出现错误  ", fmt.Errorf("%v", err))
 				fmt.Println("出现错误TIMEOUT!!!!!!!!!!!", server, domain)
-				gg.Setflag(domain, msgType, server, Graph.Timeout)
-				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
-				gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
-				gg.AddNode(nodenum, Graph.TimeoutNode)
+				// gg.Setflag(domain, msgType, server, Graph.Timeout)
+				// nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				// gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
+				// gg.AddNode(nodenum, Graph.TimeoutNode)
 
 				//Graph.Setflag(domain, msgType, server, 5) //节点标记为错误节点
 				return nil, fmt.Errorf("%s:%v", server, err)
