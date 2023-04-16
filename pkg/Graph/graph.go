@@ -2,7 +2,6 @@ package Graph
 
 import (
 	"fmt"
-	"hello/pkg/Cache"
 
 	//"hash/maphash"
 	"github.com/yourbasic/graph"
@@ -34,7 +33,10 @@ const (
 	NoNsrecordNode     = 986
 	NsNotGlueIPNode    = 987
 	IPerrorNode        = 988
-	IDMisMatcNode      = 989
+	IDMisMatchNode     = 989
+	LeaveANode         = 990
+	LeaveAAAANode      = 991
+	LeaveCNAMENode     = 992
 )
 
 type GraphStruct struct {
@@ -108,7 +110,8 @@ func (g *GraphStruct) GetNum() (num int) {
 
 func (g *GraphStruct) AddNode(num1 int, num2 int) {
 	//fmt.Println("在图中插入节点", num1, num2)
-	Cache.AddEdge(1)
+
+	//Cache.AddEdge(1)
 	g.Domaingraph.Add(num1, num2) //Add inserts a directed edge from v to w with zero cost. It removes the previous cost if this edge already exists.
 }
 
@@ -146,7 +149,7 @@ func (g *GraphStruct) Setflag(domain string, Qtype uint16, Ip string, flag int) 
 	//GraphMap[temp].flag = flag
 }
 
-func (g *GraphStruct) NodeNum(domain string, Qtype uint16, Ip string) (Nodenum int, flag bool) {
+func (g *GraphStruct) NodeNum(domain string, Qtype uint16, Ip string) (Nodenum int) {
 	var Nodeint int
 	var temp Key
 	temp.Domain = domain
@@ -157,7 +160,7 @@ func (g *GraphStruct) NodeNum(domain string, Qtype uint16, Ip string) (Nodenum i
 	if value, ok := g.GraphMap[temp]; ok {
 		Nodeint = value.ID
 		//fmt.Println("图中已有该节点，只需要加一条边")
-		return Nodeint, true
+		return Nodeint
 	} else {
 		//fmt.Println("图中没有该节点，需要加一个点")
 		var value Value
@@ -168,7 +171,7 @@ func (g *GraphStruct) NodeNum(domain string, Qtype uint16, Ip string) (Nodenum i
 		g.GraphReverse[value.ID] = temp
 		value.flag = 0 //该节点未访问
 		g.GraphMap[temp] = value
-		return value.ID, false
+		return value.ID
 	}
 }
 

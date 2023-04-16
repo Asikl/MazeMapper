@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"hello/pkg/Cache"
+	"os"
 	"sync"
 
 	"hello/pkg/DrawGraph"
@@ -16,12 +18,13 @@ func Total(domain string, sy *sync.WaitGroup) {
 	fmt.Println("Hlol")
 	var dig Resolver.Dig
 	var gg Graph.GraphStruct
-	Cache.InitERROR()
+	var cc Cache.CacheStruct
+	Cache.Init(domain, &cc)
 
 	Graph.Init(&gg, domain)
 	//rsps, err := dig.Trace(domain) //dig +trace
 
-	_, err := dig.Trace(domain, dns.TypeA, &gg) //dig +trace
+	_, err := dig.Trace(domain, dns.TypeA, &gg, &cc) //dig +trace
 
 	//tempmap, err := dig.TraceIP(domain)
 
@@ -60,24 +63,55 @@ func Total(domain string, sy *sync.WaitGroup) {
 }
 
 func main() {
-	//var domain string
-	// var dig Resolver.Dig
-	// var gg Graph.GraphStruct
 
-	// Cache.InitERROR()
-	//Draw.DrawGraph()
-	//fmt.Println("please input your domain：")
-	//fmt.Scanf("%s", &domain)
+	// 打开文本文件,读取txt
+	var domain = make([]string, 0)
+	file, err := os.Open("example.txt")
+	if err != nil {
+		fmt.Println("文件读取错误", err)
+	}
+	defer file.Close()
+	// 使用bufio.NewReader创建缓冲读取器
+	scanner := bufio.NewScanner(file)
+	// 逐行读取文件内容
+
+	// 逐行读取文件内容
+	for scanner.Scan() {
+		// 获取扫描到的一行文本
+		line := scanner.Text()
+
+		// 打印读取到的一行文本
+		//fmt.Println(line)
+		domain = append(domain, line)
+	}
+
+	// 打开Excel文件
+
+	// excelFile, err := excelize.OpenFile("Book1.xlsx")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+
+	// // 遍历所有工作表
+	// for _, sheet := range excelFile.Sheet[0] {
+	// 	fmt.Println("Sheet Name:", sheet.Name)
+
+	// 	// 遍历每一行
+	// 	for _, row := range sheet.Rows {
+	// 		// 只读取第一列的数据
+	// 		cell := row.Cells[0]
+	// 		fmt.Println("Value:", cell.String())
+	// 		domain = append(domain, cell)
+	// 	}
+	// }
+
 	var wg sync.WaitGroup
-
-	//wg.Add(3)
-	//var domain = [...]string{"www.baidu.com", "eamis.nankai.edu.cn", "69guy.net"}
-	var domain = [...]string{"69guy.net"}
+	fmt.Println(len(domain), " ", domain)
 	wg.Add(len(domain))
 	for _, value := range domain {
 		fmt.Println("协程", value)
 		go Total(value, &wg)
 	}
 	wg.Wait()
-
 }

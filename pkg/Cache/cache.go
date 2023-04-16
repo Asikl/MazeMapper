@@ -5,13 +5,19 @@ import (
 	"fmt"
 )
 
+type CacheStruct struct {
+	Domain      string
+	cacheFIX    map[Cachekey]Cachevalue
+	DomainERROR ERROR
+}
+
 type Cachekey struct {
 	CacheDomain string
 	QType       uint16
 	CacheIp     string
 }
 type Cachevalue struct {
-	flag bool //来标志该缓存的NS记录带不带IP
+	flag bool
 	NS   []string
 	IP   []string
 }
@@ -30,7 +36,7 @@ type ERROR struct {
 }
 
 // 先定义一个比较low的全局缓存cache
-var cacheFIX = make(map[Cachekey]Cachevalue, 0)
+//var cacheFIX = make(map[Cachekey]Cachevalue, 0)
 
 // func InitCache() map[Cachekey]Cachevalue {
 // 	// 先定义一个比较low的全局缓存cache
@@ -39,132 +45,134 @@ var cacheFIX = make(map[Cachekey]Cachevalue, 0)
 // 	return cacheFIX
 // }
 
-var DomainERROR ERROR
+//var DomainERROR ERROR
 
-func ERROR0Init() {
-	DomainERROR.ERROR0 = 0
+func (c *CacheStruct) ERROR0Init() {
+	c.DomainERROR.ERROR0 = 0
 }
-func GetERROR0() (num int) {
-	return DomainERROR.ERROR0
+func (c *CacheStruct) GetERROR0() (num int) {
+	return c.DomainERROR.ERROR0
 }
-func AddERROR0() {
-	DomainERROR.ERROR0++
-}
-
-func ERROR1Init() {
-	DomainERROR.ERROR1 = 0
-}
-func GetERROR1() (num int) {
-	return DomainERROR.ERROR1
-}
-func AddERROR1() {
-	DomainERROR.ERROR1++
+func (c *CacheStruct) AddERROR0() {
+	c.DomainERROR.ERROR0++
 }
 
-func ERROR2Init() {
-	DomainERROR.ERROR2 = 0
+func (c *CacheStruct) ERROR1Init() {
+	c.DomainERROR.ERROR1 = 0
 }
-func GetERROR2() (num int) {
-	return DomainERROR.ERROR2
+func (c *CacheStruct) GetERROR1() (num int) {
+	return c.DomainERROR.ERROR1
 }
-func AddERROR2() {
-	DomainERROR.ERROR2++
-}
-
-func ERROR3Init() {
-	DomainERROR.ERROR3 = 0
-}
-func GetERROR3() (num int) {
-	return DomainERROR.ERROR3
-}
-func AddERROR3() {
-	DomainERROR.ERROR3++
+func (c *CacheStruct) AddERROR1() {
+	c.DomainERROR.ERROR1++
 }
 
-func ERROR4Init() {
-	DomainERROR.ERROR4 = 0
+func (c *CacheStruct) ERROR2Init() {
+	c.DomainERROR.ERROR2 = 0
 }
-func GetERROR4() (num int) {
-	return DomainERROR.ERROR4
+func (c *CacheStruct) GetERROR2() (num int) {
+	return c.DomainERROR.ERROR2
 }
-func AddERROR4() {
-	DomainERROR.ERROR4++
-}
-
-func ERROR5Init() {
-	DomainERROR.ERROR5 = 0
-}
-func GetERROR5() (num int) {
-	return DomainERROR.ERROR5
-}
-func AddERROR5() {
-	DomainERROR.ERROR5++
+func (c *CacheStruct) AddERROR2() {
+	c.DomainERROR.ERROR2++
 }
 
-func ERROR6Init() {
-	DomainERROR.ERROR6 = 0
+func (c *CacheStruct) ERROR3Init() {
+	c.DomainERROR.ERROR3 = 0
 }
-func GetERROR6() (num int) {
-	return DomainERROR.ERROR6
+func (c *CacheStruct) GetERROR3() (num int) {
+	return c.DomainERROR.ERROR3
 }
-func AddERROR6() {
-	DomainERROR.ERROR6++
-}
-
-func ERROR7Init() {
-	DomainERROR.ERROR7 = 0
-}
-func GetERROR7() (num int) {
-	return DomainERROR.ERROR7
-}
-func AddERROR7() {
-	DomainERROR.ERROR7++
+func (c *CacheStruct) AddERROR3() {
+	c.DomainERROR.ERROR3++
 }
 
-func EdegeInit() {
-	DomainERROR.Edge = 0
+func (c *CacheStruct) ERROR4Init() {
+	c.DomainERROR.ERROR4 = 0
+}
+func (c *CacheStruct) GetERROR4() (num int) {
+	return c.DomainERROR.ERROR4
+}
+func (c *CacheStruct) AddERROR4() {
+	c.DomainERROR.ERROR4++
 }
 
-func AddEdge(num int) {
-	DomainERROR.Edge += num
+func (c *CacheStruct) ERROR5Init() {
+	c.DomainERROR.ERROR5 = 0
 }
-func GetEdge() (num int) {
-	return DomainERROR.Edge
+func (c *CacheStruct) GetERROR5() (num int) {
+	return c.DomainERROR.ERROR5
 }
-
-func InitERROR() {
-	ERROR1Init()
-	ERROR2Init()
-	ERROR3Init()
-	ERROR4Init()
-	ERROR5Init()
-	ERROR6Init()
-	ERROR7Init()
+func (c *CacheStruct) AddERROR5() {
+	c.DomainERROR.ERROR5++
 }
 
-func Add(domain string, server string, Qtype uint16, value Cachevalue) {
+func (c *CacheStruct) ERROR6Init() {
+	c.DomainERROR.ERROR6 = 0
+}
+func (c *CacheStruct) GetERROR6() (num int) {
+	return c.DomainERROR.ERROR6
+}
+func (c *CacheStruct) AddERROR6() {
+	c.DomainERROR.ERROR6++
+}
+
+func (c *CacheStruct) ERROR7Init() {
+	c.DomainERROR.ERROR7 = 0
+}
+func (c *CacheStruct) GetERROR7() (num int) {
+	return c.DomainERROR.ERROR7
+}
+func (c *CacheStruct) AddERROR7() {
+	c.DomainERROR.ERROR7++
+}
+
+func (c *CacheStruct) EdegeInit() {
+	c.DomainERROR.Edge = 0
+}
+
+func (c *CacheStruct) AddEdge(num int) {
+	c.DomainERROR.Edge += num
+}
+func (c *CacheStruct) GetEdge() (num int) {
+	return c.DomainERROR.Edge
+}
+
+func Init(domain string, c *CacheStruct) {
+
+	c.cacheFIX = make(map[Cachekey]Cachevalue, 0)
+	c.ERROR1Init()
+	c.ERROR2Init()
+	c.ERROR3Init()
+	c.ERROR4Init()
+	c.ERROR5Init()
+	c.ERROR6Init()
+	c.ERROR7Init()
+}
+
+func (c *CacheStruct) Add(domain string, server string, Qtype uint16, value Cachevalue) {
 
 	var temp Cachekey
 	temp.CacheDomain = domain
 	temp.CacheIp = server
 	temp.QType = Qtype
-	cacheFIX[temp] = value
+	c.cacheFIX[temp] = value
 }
 
-func GetCache(domain string, server string, Qtype uint16) (value Cachevalue) {
+func (c *CacheStruct) GetCache(domain string, server string, Qtype uint16) (value Cachevalue) {
 	var key Cachekey
 	key.CacheDomain = domain
 	key.CacheIp = server
 	key.QType = Qtype
-	return cacheFIX[key]
+	return c.cacheFIX[key]
 }
 
-func Has(domain string, server string, Qtype uint16) (flag bool) {
+func (c *CacheStruct) Has(domain string, server string, Qtype uint16) (flag bool) {
 	var temp Cachekey
 	temp.CacheDomain = domain
 	temp.CacheIp = server
 	temp.QType = Qtype
-	if _, ok := cacheFIX[temp]; ok {
+	if _, ok := c.cacheFIX[temp]; ok {
 		//fmt.Println("缓存中已有，是重复节点！")
 		return true
 		//存在
@@ -173,6 +181,6 @@ func Has(domain string, server string, Qtype uint16) (flag bool) {
 	}
 }
 
-func Dump() {
-	fmt.Println(cacheFIX)
+func (c *CacheStruct) Dump() {
+	fmt.Println(c.cacheFIX)
 }

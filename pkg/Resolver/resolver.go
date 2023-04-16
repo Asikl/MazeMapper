@@ -36,10 +36,8 @@ type TraceResponse struct {
 	//type1    TypeDNSKEY.Msg
 }
 
-// var responses = make([]TraceResponse, 0)
-
 // Resolver
-func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Graph.GraphStruct) ([]TraceResponse, error) {
+func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Graph.GraphStruct, cc *Cache.CacheStruct) ([]TraceResponse, error) {
 	//var responses = make([]TraceResponse, 0)
 	var servers = make([]string, 0)
 	//cacheFIX := make(map[cachekey]cachevalue)
@@ -49,25 +47,20 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 	for {
 		if err := d.SetDNS(server); err != nil {
 			fmt.Println("IP本身有问题", err)
-			gg.Setflag(domain, msgType, distination, Graph.IPerror)
+			nodenum := gg.NodeNum(domain, dns.TypeA, server)
+			gg.AddNode(nodenum, Graph.IPerrorNode)
+			gg.Setflag(domain, msgType, distination, 1)
 			return nil, nil
 		}
-		if Cache.Has(domain, server, dns.TypeA) {
+		if cc.Has(domain, server, dns.TypeA) {
 			//先得到cache里的内容
-			value := Cache.GetCache(domain, server, dns.TypeA)
-			nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
+			value := cc.GetCache(domain, server, dns.TypeA)
+			nodenum := gg.NodeNum(domain, dns.TypeA, server)
 			//Cache.AddEdge(1)
 			for _, tempserver := range value.IP {
 				//Cache.AddEdge(1)
-				tempnodenum, flag := gg.NodeNum(domain, dns.TypeA, tempserver)
-				if flag {
-					//fmt.Println("两个节点图里面都有了")
-					gg.AddNode(nodenum, tempnodenum)
-					continue
-				} else {
-					//fmt.Println("只有一个节点图里面有")
-					gg.AddNode(nodenum, tempnodenum)
-				}
+				tempnodenum := gg.NodeNum(domain, dns.TypeA, tempserver)
+				gg.AddNode(nodenum, tempnodenum)
 			}
 			//处理指向节点
 			return nil, nil
@@ -83,64 +76,72 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				gg.Setflag(domain, msgType, server, Graph.Common)
 			case 61:
 				gg.Setflag(domain, msgType, server, Graph.Timeout)
+				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.TimeoutNode)
+				fmt.Println(domain, server)
 			case 62:
 				gg.Setflag(domain, msgType, server, Graph.Timeout)
+				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.TimeoutNode)
 			case 63:
 				gg.Setflag(domain, msgType, server, Graph.Timeout)
+				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.TimeoutNode)
 			case 9:
 				gg.Setflag(domain, msgType, server, Graph.IDMisMatch)
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.IDMisMatchNode)
+
 			}
 			//Graph.Setflag(domain, msgType, server, 1) //节点标记为已访问
 			if err != nil {
-				Cache.AddERROR6()
+				cc.AddERROR6()
 				fmt.Println("出现错误  ", fmt.Errorf("%s,%v", server, err))
 				//Graph.Setflag(domain, msgType, server, 5) //节点标记为错误节点
 				return nil, fmt.Errorf("%s:%v", server, err)
 			}
-			//Graph.Setflag(domain, msgType, server, 1) //节点标记为已访问
+			gg.Setflag(domain, msgType, server, 1) //节点标记为已访问
 
 			switch msg.Rcode {
 			case 0:
 				//fmt.Println("NOERROR")
-				Cache.AddERROR0()
+				cc.AddERROR0()
 			case 1:
 				fmt.Println("出现错误  格式错误")
-
-				gg.Setflag(domain, msgType, server, Graph.Corrupt)
-				Cache.AddERROR1()
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.CorruptNode)
+				//gg.Setflag(domain, msgType, server, 1)
+				cc.AddERROR1()
 				return nil, nil
 			case 2:
 				fmt.Println("出现错误  Server Failure")
-				gg.Setflag(domain, msgType, server, Graph.Serverfailure)
-				Cache.AddERROR2()
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.ServerfailureNode)
+				//gg.Setflag(domain, msgType, server, Graph.Serverfailure)
+				cc.AddERROR2()
 				return nil, nil
 			case 3:
 				fmt.Println("出现错误  Name Error")
-				gg.Setflag(domain, msgType, server, Graph.NameError)
-				Cache.AddERROR3()
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.NameErrorNode)
+				//gg.Setflag(domain, msgType, server, Graph.NameError)
+				cc.AddERROR3()
 				return nil, nil
 			case 4:
 				fmt.Println("出现错误  不支持查询类型")
-				gg.Setflag(domain, msgType, server, Graph.NotImplemented)
-				Cache.AddERROR4()
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.NotImplementedNode)
+				//gg.Setflag(domain, msgType, server, Graph.NotImplemented)
+				cc.AddERROR4()
 				return nil, nil
 			case 5:
 				fmt.Println("出现错误  Refused")
 
-				nodenum, flag := gg.NodeNum(gg.Domain, dns.TypeA, server)
-				if flag {
-					//fmt.Println("两个节点图里面都有了")
-					gg.AddNode(nodenum, Graph.RefusedNode)
-					continue
-				} else {
-					//fmt.Println("只有一个节点图里面有")
-					gg.AddNode(nodenum, Graph.RefusedNode)
-				}
-
+				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.RefusedNode)
 				fmt.Println(domain, server)
-
-				gg.Setflag(domain, msgType, server, Graph.Refused)
-				Cache.AddERROR5()
+				//gg.Setflag(domain, msgType, server, Graph.Refused)
+				cc.AddERROR5()
 				return nil, nil
 			}
 			//answernum:=msg.MsgHdr.
@@ -150,18 +151,10 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 			if len(msg.Answer) == 0 {
 				//fmt.Println("==================================")
 				servers = servers[:0]
-				if len(msg.Extra) <= 1 {
-
+				if len(msg.Ns) == 0 {
 					fmt.Println("没有NS记录XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
-					nodenum, flag := gg.NodeNum(gg.Domain, dns.TypeA, server)
-					if flag {
-						//fmt.Println("两个节点图里面都有了")
-						gg.AddNode(nodenum, 999)
-						continue
-					} else {
-						//fmt.Println("只有一个节点图里面有")
-						gg.AddNode(nodenum, 999)
-					}
+					nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+					gg.AddNode(nodenum, Graph.NoNsrecordNode)
 					return nil, nil
 				}
 				for _, value := range msg.Extra { //通过range可以直接得到数组元素
@@ -183,7 +176,6 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 					}
 				}
 				//fmt.Println("MSG======:", msg)
-
 				//处理NS记录不附带IP的情况
 				if len(servers) == 0 {
 					fmt.Println("Not glue IP!")
@@ -200,78 +192,58 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 					//====================把NS不带IP的记录也放到缓存里面
 					var cachevalue Cache.Cachevalue
 					cachevalue.IP = NsNotGlueIP
-					Cache.Add(domain, server, dns.TypeA, cachevalue)
-					nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
-					for _, tempserver := range NsNotGlueIP {
-						tempnodenum, flag := gg.NodeNum(tempserver, dns.TypeA, "")
-						if flag {
-							gg.AddNode(nodenum, tempnodenum)
-							continue
-						} else {
-							//fmt.Println("只有一个节点图里面有")
-							gg.AddNode(nodenum, tempnodenum)
-						}
-					}
+					//cachevalue.flag = true
+					cc.Add(domain, server, dns.TypeA, cachevalue)
+					// nodenum := gg.NodeNum(domain, dns.TypeA, server)
+					// for _, tempserver := range NsNotGlueIP {
+					// 	tempnodenum := gg.NodeNum(tempserver, dns.TypeA, "")
+					// 	gg.AddNode(nodenum, tempnodenum)
+					// }
 					//用于DEBUG
 					//fmt.Println("成功插入cache")
 					//fmt.Println("打印cache", cacheFIX)
 
 					//完全没有NS记录，无法继续进行查询
 					if len(NsNotGlueIP) == 0 {
-						Cache.AddERROR7()
+						cc.AddERROR7()
 						gg.Setflag(domain, msgType, server, Graph.NsNotGlueIP)
 						fmt.Println("出现错误  ", fmt.Sprintf("从%s得到的数据没有NS记录", server))
 						return nil, nil
 					} else {
-						//nodenum, _ := Graph.NodeNum(domain, int(dns.TypeA), server)
+						nodenum := gg.NodeNum(domain, dns.TypeA, server)
 						//把所有NS不带IP的情况都给从根部开始重新遍历一遍
 						for _, NS := range NsNotGlueIP {
-							nodenum, _ := gg.NodeNum(NS, dns.TypeA, "")
-							for _, value := range root46servers {
-								//nodenum, _ := Graph.NodeNum(domain, int(dns.TypeA), server)
-								tempnodenum, flag := gg.NodeNum(NS, dns.TypeA, value)
-								if flag {
-									//fmt.Println("两个节点图里面都有了")
-									gg.AddNode(nodenum, tempnodenum)
-									continue
-								} else {
-									//fmt.Println("只有一个节点图里面有")
-									gg.AddNode(nodenum, tempnodenum)
-								}
-
-								d.ResolverIP(NS, dns.TypeA, value, gg)
-							}
+							//nodenum := gg.NodeNum(NS, dns.TypeA, "")
+							// for _, value := range root46servers {
+							// 	//nodenum, _ := Graph.NodeNum(domain, int(dns.TypeA), server)
+							// 	tempnodenum := gg.NodeNum(NS, dns.TypeA, value)
+							// 	gg.AddNode(nodenum, tempnodenum)
+							// 	d.ResolverIP(NS, dns.TypeA, value, gg, cc)
+							// }
+							// 	nodenum, _ := Graph.NodeNum(domain, int(dns.TypeA), server)
+							tempnodenum := gg.NodeNum(NS, dns.TypeA, root46servers[5])
+							gg.AddNode(nodenum, tempnodenum)
+							d.ResolverIP(NS, dns.TypeA, root46servers[5], gg, cc)
 						}
-
-						//serverstemp, _ := d.TraceIP(NsNotGlueIP[0])
-						//把解析得到的IP供之前的查询继续进行下去
-
-						// for index, _ := range NSgetIP {
-						// 	servers = append(servers, index)
-						// }
-						//servers = append(servers)
 
 						fmt.Println("成功解决Ns不附带IP的情况", d.NSgetIP)
 
 						if len(servers) == 0 {
 							fmt.Println("没有可以继续访问的节点")
+							nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+							gg.AddNode(nodenum, Graph.NoNsrecordNode)
+
 							gg.Setflag(domain, msgType, server, Graph.NoNsrecord)
 						}
 
 						//domainnode, _ := Graph.NodeNum(domain, dns.TypeA, server)
 
-						for index, value := range d.NSgetIP {
-							tempnodenum, _ := gg.NodeNum(domain, dns.TypeA, value)
-							domainnode, flag := gg.NodeNum(index, dns.TypeA, value)
-							if flag {
-								//fmt.Println("两个节点图里面都有了")
-								gg.AddNode(domainnode, tempnodenum)
-							} else {
-								//fmt.Println("只有一个节点图里面有")
-								gg.AddNode(domainnode, tempnodenum)
-							}
-							d.Resolver(domain, dns.TypeA, value, gg)
-						}
+						// for index, value := range d.NSgetIP {
+						// 	tempnodenum := gg.NodeNum(domain, dns.TypeA, value)
+						// 	domainnode := gg.NodeNum(index, dns.TypeA, value)
+						// 	gg.AddNode(domainnode, tempnodenum)
+						// 	d.Resolver(domain, dns.TypeA, value, gg, cc)
+						// }
 						return nil, nil
 						//return nil, nil
 						//DEBUG
@@ -280,31 +252,26 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 					var tempvalue Cache.Cachevalue
 					tempvalue.IP = servers
 					// value := Cache.GetCache(domain, server, int(dns.TypeA))
-					nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
+					nodenum := gg.NodeNum(domain, dns.TypeA, server)
 					for _, tempserver := range tempvalue.IP {
-						tempnodenum, flag := gg.NodeNum(domain, dns.TypeA, tempserver)
-						if flag {
-							//fmt.Println("两个节点图里面都有了")
-							//fmt.Println("NNNNNNNNNNNNNN", nodenum, tempnodenum)
-							gg.AddNode(nodenum, tempnodenum)
-							continue
-						} else {
-							//fmt.Println("只有一个节点图里面有")
-							gg.AddNode(nodenum, tempnodenum)
+						tempnodenum := gg.NodeNum(domain, dns.TypeA, tempserver)
+
+						if nodenum == tempnodenum {
+							fmt.Println("nodenum==tempnodenum", msg)
 						}
+						gg.AddNode(nodenum, tempnodenum)
 					}
-					Cache.Add(domain, server, dns.TypeA, tempvalue)
+					cc.Add(domain, server, dns.TypeA, tempvalue)
 					//用于DEBUG
 					//fmt.Println("成功插入cache")
 					//fmt.Println("打印cache", cacheFIX)
 				}
-
 				// fmt.Println("XXXXXXXXXXXXXXXXX",serv)
 				//fmt.Println("Servers查BUG", servers)
 				for _, value := range servers {
 					//fmt.Println("递归查询：", index)
 					//递归查询
-					d.Resolver(domain, dns.TypeA, value, gg)
+					d.Resolver(domain, dns.TypeA, value, gg, cc)
 				}
 				return nil, nil
 			} else {
@@ -316,26 +283,20 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 					//处理CNAME
 					if value.Header().Rrtype == dns.TypeCNAME {
 						ns, ok := value.(*dns.CNAME)
-						nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
+						nodenum := gg.NodeNum(domain, dns.TypeA, server)
 						//把这一条放到缓存里
 
-						Cache.Add(domain, server, dns.TypeA, tempvalue)
+						cc.Add(domain, server, dns.TypeA, tempvalue)
 						//fmt.Println("CNAME放到cache里了")
 						if ok {
 							for _, value := range root46servers {
 								//CNAME插入图中
 								//Graph.Setflag(domain, msgType, value, Graph.LeaveCNAME)
-								tempnodenum, flag := gg.NodeNum(ns.Target, msgType, value)
-								if flag {
-									//fmt.Println("两个节点图里面都有了")
-									gg.AddNode(nodenum, tempnodenum)
-									continue
-								} else {
-									//fmt.Println("只有一个节点图里面有")
-									gg.AddNode(nodenum, tempnodenum)
-								}
+								tempnodenum := gg.NodeNum(ns.Target, msgType, value)
+								gg.AddNode(nodenum, tempnodenum)
+
 								//d.ResolverIP(ns.Target, dns.TypeCNAME, value)
-								d.Resolver(ns.Target, msgType, value, gg)
+								d.Resolver(ns.Target, msgType, value, gg, cc)
 							}
 						}
 						return nil, nil
@@ -344,20 +305,13 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 					//打印结果A记录
 					if value.Header().Rrtype == dns.TypeA {
 						ns, _ := value.(*dns.A)
-
-						nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
+						nodenum := gg.NodeNum(domain, dns.TypeA, server)
 						//fmt.Println("打印A记录", ns.A, gg.Domain, nodenum)
 						//gg.Setflag(domain, msgType, string(ns.A), Graph.LeaveA)
-						tempnodenum, flag := gg.NodeNum(domain, msgType, ns.A.String())
-						fmt.Println("打印A记录", ns.A, gg.Domain, tempnodenum)
-						if flag {
-							//fmt.Println("两个节点图里面都有了")
-							gg.AddNode(nodenum, tempnodenum)
-							continue
-						} else {
-							//fmt.Println("只有一个节点图里面有")
-							gg.AddNode(nodenum, tempnodenum)
-						}
+						tempnodenum := gg.NodeNum(domain, msgType, ns.A.String())
+						fmt.Println("打印A记录", ns.A, domain, tempnodenum)
+						gg.AddNode(nodenum, tempnodenum)
+						gg.AddNode(tempnodenum, Graph.LeaveANode)
 						// return responses, nil
 					}
 
@@ -366,18 +320,12 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 						ns, _ := value.(*dns.AAAA)
 						fmt.Println("打印AAAA记录", ns.AAAA, domain)
 
-						nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
+						nodenum := gg.NodeNum(domain, dns.TypeA, server)
 						//Graph.Setflag(domain, msgType, string(ns.AAAA), 6)
 						gg.Setflag(domain, msgType, string(ns.AAAA), Graph.LeaveAAAA)
-						tempnodenum, flag := gg.NodeNum(domain, msgType, ns.AAAA.String())
-						if flag {
-							//fmt.Println("两个节点图里面都有了")
-							gg.AddNode(nodenum, tempnodenum)
-							continue
-						} else {
-							//fmt.Println("只有一个节点图里面有")
-							gg.AddNode(nodenum, tempnodenum)
-						}
+						tempnodenum := gg.NodeNum(domain, msgType, ns.AAAA.String())
+						gg.AddNode(nodenum, tempnodenum)
+						gg.AddNode(tempnodenum, Graph.LeaveAAAANode)
 						// return responses, nil
 					}
 				}
@@ -389,7 +337,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 }
 
 // Trace  类似于 dig +trace,把所有根都遍历一遍
-func (d *Dig) Trace(domain string, Qtype uint16, gg *Graph.GraphStruct) ([]TraceResponse, error) {
+func (d *Dig) Trace(domain string, Qtype uint16, gg *Graph.GraphStruct, cc *Cache.CacheStruct) ([]TraceResponse, error) {
 
 	//gg.Init()
 	//gg.Init()
@@ -398,10 +346,10 @@ func (d *Dig) Trace(domain string, Qtype uint16, gg *Graph.GraphStruct) ([]Trace
 		fmt.Println("ROOT：", index)
 
 		//画图
-		num, _ := gg.NodeNum(domain, Qtype, value)
+		num := gg.NodeNum(domain, Qtype, value)
 		fmt.Println("ROOTnum：", num, domain, Qtype, value)
 		gg.AddNode(0, num)
-		race, _ := d.Resolver(domain, dns.TypeA, value, gg)
+		race, _ := d.Resolver(domain, dns.TypeA, value, gg, cc)
 		trace = append(trace, race...)
 	}
 	return trace, nil
@@ -433,7 +381,7 @@ func Mapmerge(map1 map[string]string, map2 map[string]string) map[string]string 
 
 // ResolverIP
 
-func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *Graph.GraphStruct) ([]TraceResponse, error) {
+func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *Graph.GraphStruct, cc *Cache.CacheStruct) ([]TraceResponse, error) {
 	//var responses = make([]TraceResponse, 0)
 	var servers = make([]string, 0)
 	//cacheFIX := make(map[cachekey]cachevalue)
@@ -446,22 +394,16 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 			gg.Setflag(domain, msgType, distination, Graph.IPerror)
 			return nil, nil
 		}
-		if Cache.Has(domain, server, dns.TypeA) {
+		if cc.Has(domain, server, dns.TypeA) {
 			//先得到cache里的内容
-			value := Cache.GetCache(domain, server, dns.TypeA)
-			nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
+			value := cc.GetCache(domain, server, dns.TypeA)
+			nodenum := gg.NodeNum(domain, dns.TypeA, server)
 			//Cache.AddEdge(1)
 			for _, tempserver := range value.IP {
 				//Cache.AddEdge(1)
-				tempnodenum, flag := gg.NodeNum(domain, dns.TypeA, tempserver)
-				if flag {
-					//fmt.Println("两个节点图里面都有了")
-					gg.AddNode(nodenum, tempnodenum)
-					continue
-				} else {
-					//fmt.Println("只有一个节点图里面有")
-					gg.AddNode(nodenum, tempnodenum)
-				}
+				tempnodenum := gg.NodeNum(domain, dns.TypeA, tempserver)
+				gg.AddNode(nodenum, tempnodenum)
+
 			}
 			//处理指向节点
 			return nil, nil
@@ -472,21 +414,32 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 				return nil, nil
 			}
 			msg, err, num := d.GetMsg(msgType, domain) //GetMsg
+
 			switch num {
 			case 100: //正常节点
 				gg.Setflag(domain, msgType, server, Graph.Common)
 			case 61:
 				gg.Setflag(domain, msgType, server, Graph.Timeout)
+				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.TimeoutNode)
+				fmt.Println(domain, server)
 			case 62:
 				gg.Setflag(domain, msgType, server, Graph.Timeout)
+				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.TimeoutNode)
 			case 63:
 				gg.Setflag(domain, msgType, server, Graph.Timeout)
+				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.TimeoutNode)
 			case 9:
 				gg.Setflag(domain, msgType, server, Graph.IDMisMatch)
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.IDMisMatchNode)
 			}
+
 			//Graph.Setflag(domain, msgType, server, 1) //节点标记为已访问
 			if err != nil {
-				Cache.AddERROR6()
+				cc.AddERROR6()
 				fmt.Println("出现错误  ", fmt.Errorf("%s,%v", server, err))
 				//Graph.Setflag(domain, msgType, server, 5) //节点标记为错误节点
 				return nil, fmt.Errorf("%s:%v", server, err)
@@ -501,32 +454,43 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 			switch msg.Rcode {
 			case 0:
 				//fmt.Println("NOERROR")
-				Cache.AddERROR0()
+				cc.AddERROR0()
 			case 1:
 				fmt.Println("出现错误  格式错误")
-
-				gg.Setflag(domain, msgType, server, Graph.Corrupt)
-				Cache.AddERROR1()
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.CorruptNode)
+				//gg.Setflag(domain, msgType, server, 1)
+				cc.AddERROR1()
 				return nil, nil
 			case 2:
 				fmt.Println("出现错误  Server Failure")
-				gg.Setflag(domain, msgType, server, Graph.Serverfailure)
-				Cache.AddERROR2()
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.ServerfailureNode)
+				//gg.Setflag(domain, msgType, server, Graph.Serverfailure)
+				cc.AddERROR2()
 				return nil, nil
 			case 3:
 				fmt.Println("出现错误  Name Error")
-				gg.Setflag(domain, msgType, server, Graph.NameError)
-				Cache.AddERROR3()
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.NameErrorNode)
+				//gg.Setflag(domain, msgType, server, Graph.NameError)
+				cc.AddERROR3()
 				return nil, nil
 			case 4:
 				fmt.Println("出现错误  不支持查询类型")
-				gg.Setflag(domain, msgType, server, Graph.NotImplemented)
-				Cache.AddERROR4()
+				nodenum := gg.NodeNum(domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.NotImplementedNode)
+				//gg.Setflag(domain, msgType, server, Graph.NotImplemented)
+				cc.AddERROR4()
 				return nil, nil
 			case 5:
 				fmt.Println("出现错误  Refused")
-				gg.Setflag(domain, msgType, server, Graph.Refused)
-				Cache.AddERROR5()
+
+				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+				gg.AddNode(nodenum, Graph.RefusedNode)
+				fmt.Println(domain, server)
+				//gg.Setflag(domain, msgType, server, Graph.Refused)
+				cc.AddERROR5()
 				return nil, nil
 			}
 			//answernum:=msg.MsgHdr.
@@ -573,26 +537,21 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 					//====================把NS不带IP的记录也放到缓存里面
 					var cachevalue Cache.Cachevalue
 					cachevalue.IP = NsNotGlueIP
-					Cache.Add(domain, server, dns.TypeA, cachevalue)
+					cc.Add(domain, server, dns.TypeA, cachevalue)
 
-					nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
-					for _, tempserver := range NsNotGlueIP {
-						tempnodenum, flag := gg.NodeNum(tempserver, dns.TypeA, "")
-						if flag {
-							gg.AddNode(nodenum, tempnodenum)
-							continue
-						} else {
-							//fmt.Println("只有一个节点图里面有")
-							gg.AddNode(nodenum, tempnodenum)
-						}
-					}
+					// nodenum := gg.NodeNum(domain, dns.TypeA, server)
+					// for _, tempserver := range NsNotGlueIP {
+					// 	tempnodenum := gg.NodeNum(tempserver, dns.TypeA, "")
+					// 	gg.AddNode(nodenum, tempnodenum)
+
+					// }
 					//用于DEBUG
 					//fmt.Println("成功插入cache")
 					//fmt.Println("打印cache", cacheFIX)
 
 					//完全没有NS记录，无法继续进行查询
 					if len(NsNotGlueIP) == 0 {
-						Cache.AddERROR7()
+						cc.AddERROR7()
 						gg.Setflag(domain, msgType, server, Graph.NsNotGlueIP)
 						fmt.Println("出现错误  ", fmt.Sprintf("从%s得到的数据没有NS记录", server))
 						return nil, nil
@@ -600,21 +559,17 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 						//nodenum, _ := Graph.NodeNum(domain, int(dns.TypeA), server)
 						//把所有NS不带IP的情况都给从根部开始重新遍历一遍
 						for _, NS := range NsNotGlueIP {
-							nodenum, _ := gg.NodeNum(NS, dns.TypeA, "")
-							for _, value := range root46servers {
-								//nodenum, _ := Graph.NodeNum(domain, int(dns.TypeA), server)
-								tempnodenum, flag := gg.NodeNum(NS, dns.TypeA, value)
-								if flag {
-									//fmt.Println("两个节点图里面都有了")
-									gg.AddNode(nodenum, tempnodenum)
-									continue
-								} else {
-									//fmt.Println("只有一个节点图里面有")
-									gg.AddNode(nodenum, tempnodenum)
-								}
-								d.ResolverIP(NS, dns.TypeA, value, gg)
-							}
-
+							nodenum := gg.NodeNum(NS, dns.TypeA, "")
+							// for _, value := range root46servers {
+							// 	//nodenum, _ := Graph.NodeNum(domain, int(dns.TypeA), server)
+							// 	tempnodenum := gg.NodeNum(NS, dns.TypeA, value)
+							// 	gg.AddNode(nodenum, tempnodenum)
+							// 	d.ResolverIP(NS, dns.TypeA, value, gg, cc)
+							// }
+							// 	//nodenum, _ := Graph.NodeNum(domain, int(dns.TypeA), server)
+							tempnodenum := gg.NodeNum(NS, dns.TypeA, root46servers[5])
+							gg.AddNode(nodenum, tempnodenum)
+							d.ResolverIP(NS, dns.TypeA, root46servers[5], gg, cc)
 						}
 						//serverstemp, _ := d.TraceIP(NsNotGlueIP[0])
 						//把解析得到的IP供之前的查询继续进行下去
@@ -625,24 +580,19 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 						// }
 						//servers = append(servers)
 
-						fmt.Println("成功解决Ns不附带IP的情况", d.NSgetIP)
+						fmt.Println("成功解决Ns不附带IP的情况", d.NSgetIP, domain, server)
 
 						if len(d.NSgetIP) == 0 {
-							fmt.Println("没有可以继续访问的节点")
+							fmt.Println("没有可以继续访问的节点", domain, server)
 						}
 
-						domainnode, _ := gg.NodeNum(domain, dns.TypeA, server)
+						domainnode := gg.NodeNum(domain, dns.TypeA, server)
 
 						for index, value := range d.NSgetIP {
-							tempnodenum, flag := gg.NodeNum(index, dns.TypeA, value)
-							if flag {
-								//fmt.Println("两个节点图里面都有了")
-								gg.AddNode(domainnode, tempnodenum)
-							} else {
-								//fmt.Println("只有一个节点图里面有")
-								gg.AddNode(domainnode, tempnodenum)
-							}
-							d.ResolverIP(domain, dns.TypeA, value, gg)
+							tempnodenum := gg.NodeNum(index, dns.TypeA, value)
+							gg.AddNode(domainnode, tempnodenum)
+
+							d.ResolverIP(domain, dns.TypeA, value, gg, cc)
 						}
 
 						return nil, nil
@@ -653,20 +603,13 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 					var tempvalue Cache.Cachevalue
 					tempvalue.IP = servers
 					// value := Cache.GetCache(domain, server, int(dns.TypeA))
-					nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
+					nodenum := gg.NodeNum(domain, dns.TypeA, server)
 					for _, tempserver := range tempvalue.IP {
-						tempnodenum, flag := gg.NodeNum(domain, dns.TypeA, tempserver)
-						if flag {
-							//fmt.Println("两个节点图里面都有了")
-							//fmt.Println("NNNNNNNNNNNNNN", nodenum, tempnodenum)
-							gg.AddNode(nodenum, tempnodenum)
-							continue
-						} else {
-							//fmt.Println("只有一个节点图里面有")
-							gg.AddNode(nodenum, tempnodenum)
-						}
+						tempnodenum := gg.NodeNum(domain, dns.TypeA, tempserver)
+						gg.AddNode(nodenum, tempnodenum)
+
 					}
-					Cache.Add(domain, server, dns.TypeA, tempvalue)
+					cc.Add(domain, server, dns.TypeA, tempvalue)
 					//用于DEBUG
 					//fmt.Println("成功插入cache")
 					//fmt.Println("打印cache", cacheFIX)
@@ -677,7 +620,7 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 				for _, value := range servers {
 					//fmt.Println("递归查询：", index)
 					//递归查询
-					d.Resolver(domain, dns.TypeA, value, gg)
+					d.Resolver(domain, dns.TypeA, value, gg, cc)
 				}
 				return nil, nil
 			} else {
@@ -689,26 +632,20 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 					//处理CNAME
 					if value.Header().Rrtype == dns.TypeCNAME {
 						ns, ok := value.(*dns.CNAME)
-						nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
+						nodenum := gg.NodeNum(domain, dns.TypeA, server)
 						//把这一条放到缓存里
 
-						Cache.Add(domain, server, dns.TypeA, tempvalue)
+						cc.Add(domain, server, dns.TypeA, tempvalue)
 						fmt.Println("CNAME放到cache里了")
 						if ok {
 							for _, value := range root46servers {
 								//CNAME插入图中
 								//Graph.Setflag(domain, msgType, value, Graph.LeaveCNAME)
-								tempnodenum, flag := gg.NodeNum(ns.Target, msgType, value)
-								if flag {
-									//fmt.Println("两个节点图里面都有了")
-									gg.AddNode(nodenum, tempnodenum)
-									continue
-								} else {
-									//fmt.Println("只有一个节点图里面有")
-									gg.AddNode(nodenum, tempnodenum)
-								}
+								tempnodenum := gg.NodeNum(ns.Target, msgType, value)
+								gg.AddNode(nodenum, tempnodenum)
+
 								//d.ResolverIP(ns.Target, dns.TypeCNAME, value)
-								d.ResolverIP(ns.Target, msgType, value, gg)
+								d.ResolverIP(ns.Target, msgType, value, gg, cc)
 							}
 						}
 						return nil, nil
@@ -719,18 +656,18 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 						ns, _ := value.(*dns.A)
 						fmt.Println("打印A记录", ns.A, domain)
 						d.NSgetIP[domain] = string(ns.A)
-						nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
+						nodenum := gg.NodeNum(domain, dns.TypeA, server)
 						gg.Setflag(domain, msgType, string(ns.A), Graph.LeaveA)
-						tempnodenum, flag := gg.NodeNum(domain, msgType, ns.A.String())
-						if flag {
-							//fmt.Println("两个节点图里面都有了")
-							gg.AddNode(nodenum, tempnodenum)
-							continue
-						} else {
-							//fmt.Println("只有一个节点图里面有")
-							gg.AddNode(nodenum, tempnodenum)
-						}
+						tempnodenum := gg.NodeNum(domain, msgType, ns.A.String())
+						gg.AddNode(nodenum, tempnodenum)
+
+						nodenumRemake := gg.NodeNum(gg.Domain, msgType, ns.A.String())
+
+						gg.AddNode(tempnodenum, nodenumRemake)
+						d.Resolver(domain, dns.TypeA, ns.A.String(), gg, cc)
+						//gg.AddNode(tempnodenum, Graph.LeaveANode)
 						// return responses, nil
+
 					}
 
 					//打印结果AAAA记录
@@ -739,18 +676,17 @@ func (d *Dig) ResolverIP(domain string, msgType uint16, distination string, gg *
 						fmt.Println("打印AAAA记录", ns.AAAA, domain)
 						d.NSgetIP[domain] = string(ns.AAAA)
 
-						nodenum, _ := gg.NodeNum(domain, dns.TypeA, server)
+						nodenum := gg.NodeNum(domain, dns.TypeA, server)
 						//Graph.Setflag(domain, msgType, string(ns.AAAA), 6)
 						gg.Setflag(domain, msgType, string(ns.AAAA), Graph.LeaveAAAA)
-						tempnodenum, flag := gg.NodeNum(domain, msgType, ns.AAAA.String())
-						if flag {
-							//fmt.Println("两个节点图里面都有了")
-							gg.AddNode(nodenum, tempnodenum)
-							continue
-						} else {
-							//fmt.Println("只有一个节点图里面有")
-							gg.AddNode(nodenum, tempnodenum)
-						}
+						tempnodenum := gg.NodeNum(domain, msgType, ns.AAAA.String())
+						gg.AddNode(nodenum, tempnodenum)
+
+						nodenumRemake := gg.NodeNum(gg.Domain, msgType, ns.AAAA.String())
+
+						gg.AddNode(tempnodenum, nodenumRemake)
+						d.Resolver(domain, dns.TypeA, ns.AAAA.String(), gg, cc)
+						//gg.AddNode(tempnodenum, Graph.LeaveAAAANode)
 						// return responses, nil
 					}
 				}

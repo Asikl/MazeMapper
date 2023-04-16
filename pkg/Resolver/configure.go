@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	dnsTimeout time.Duration = 3 * time.Second
+	dnsTimeout time.Duration = 5 * time.Second
 )
 
 // Root zone ipv4/6 servers
@@ -40,21 +40,6 @@ var root46servers = []string{
 	"2001:7fd::1",         //k
 	"2001:500:9f::42",     //l
 	"2001:dc3::35"}        //m
-
-var roots = []string{
-	"a.root-servers.net",
-	"b.root-servers.net",
-	"d.root-servers.net",
-	"c.root-servers.net",
-	"e.root-servers.net",
-	"f.root-servers.net",
-	"g.root-servers.net",
-	"h.root-servers.net",
-	"i.root-servers.net",
-	"j.root-servers.net",
-	"k.root-servers.net",
-	"l.root-servers.net",
-	"m.root-servers.net"}
 
 // SetTimeOut set read write dial timeout
 func (d *Dig) SetTimeOut(t time.Duration) {
