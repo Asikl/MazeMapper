@@ -7,8 +7,8 @@ MazeMapper is developed using Go 1.19.4. Before running the program, you need to
 
 ## **Statement**
 We take **<domain,qtype,Ip>** as the key value of each node in the graph, different colors represent different types of nodes.
-**1.** **Green：** CNAME
-**2.** **Yellow：** NS not glue IP
-**3.** **Blue：** Answer   A/AAAA
-**4.** **Red：** Error
-For different errors, we explicitly mark them in the nodes，such as **Timeout**,**Refused**,**NameError**,**Corrupt**,**IPerror**,**NotImplemented**,**IDMisMatch**,**NoNsrecord** and so on.
+**1.** **Green：** CNAME  
+**2.** **Yellow：** NS not glue IP  
+**3.** **Blue：** Answer   A/AAAA  
+**4.** **Red：** Error  
+For different errors, we explicitly mark them in the nodes，such as **Timeout**,**Refused**,**NameError**,**Corrupt**,**IPerror**,**NotImplemented**,**IDMisMatch**,**NoNsrecord** and so on.  
