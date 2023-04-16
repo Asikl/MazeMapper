@@ -117,3 +117,15 @@ func (d *Dig) conn(ctx context.Context) (net.Conn, error) {
 	di := net.Dialer{Timeout: d.dialTimeout()}           //func (d *Dialer) DialContext(ctx context.Context, network, address string) (Conn, error)
 	return di.DialContext(ctx, d.protocol(), remoteaddr) //我们一般d.protocol()是udp
 }
+func (d *Dig) RemoveDuplicates(nums []string) []string {
+	uniqueMap := make(map[string]bool) // 使用 map 存储唯一的元素
+	result := []string{}               // 用于存储去重后的结果
+	for _, num := range nums {
+		if !uniqueMap[num] {
+			// 如果 map 中不存在当前元素，则将其添加到结果数组和 map 中
+			uniqueMap[num] = true
+			result = append(result, num)
+		}
+	}
+	return result
+}

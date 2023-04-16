@@ -17,7 +17,7 @@ type Cachekey struct {
 	CacheIp     string
 }
 type Cachevalue struct {
-	flag bool
+	Flag bool
 	NS   []string
 	IP   []string
 }

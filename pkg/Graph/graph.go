@@ -37,13 +37,14 @@ const (
 	LeaveANode         = 990
 	LeaveAAAANode      = 991
 	LeaveCNAMENode     = 992
+	OneCircleNode      = 993
 )
 
 type GraphStruct struct {
 	Domain       string
 	Num          int
 	GraphMap     map[Key]Value
-	GraphReverse map[int]Key
+	GraphReverse map[int]KeyRevserse
 	Domaingraph  *graph.Mutable
 }
 
@@ -51,6 +52,13 @@ type Key struct {
 	Domain string
 	Ip     string // compatible with ipv4/ipv6, could be a user-defined ip type
 	Qtype  uint16
+}
+
+type KeyRevserse struct {
+	Domain string
+	Ip     string // compatible with ipv4/ipv6, could be a user-defined ip type
+	Qtype  uint16
+	Flag   int
 }
 
 type Value struct {
@@ -76,16 +84,20 @@ type DomainGraph struct {
 func Init(g *GraphStruct, Domain string) {
 	var Beginkey Key
 	var BeginValue Value
+	var BeginkeyReverse KeyRevserse
 	g.Domain = Domain
 	g.GraphMap = make(map[Key]Value, 0)
-	g.GraphReverse = make(map[int]Key, 0)
+	g.GraphReverse = make(map[int]KeyRevserse, 0)
 	g.Domaingraph = graph.New(1000)
 
 	Beginkey.Domain = ""
 	BeginValue.ID = 0
+
+	BeginkeyReverse.Domain = ""
+
 	//先插入一个开始节点
 	g.GraphMap[Beginkey] = BeginValue
-	g.GraphReverse[0] = Beginkey
+	g.GraphReverse[0] = BeginkeyReverse
 	g.Num = 0
 }
 
@@ -149,12 +161,25 @@ func (g *GraphStruct) Setflag(domain string, Qtype uint16, Ip string, flag int) 
 	//GraphMap[temp].flag = flag
 }
 
+func (g *GraphStruct) SetRerverseflag(nodenum int, flag int) {
+
+	temp := g.GraphReverse[nodenum]
+	temp.Flag = flag
+	g.GraphReverse[nodenum] = temp
+	//GraphMap[temp].flag = flag
+}
+
 func (g *GraphStruct) NodeNum(domain string, Qtype uint16, Ip string) (Nodenum int) {
 	var Nodeint int
 	var temp Key
+	var tempReverse KeyRevserse
 	temp.Domain = domain
 	temp.Ip = Ip
 	temp.Qtype = Qtype
+
+	tempReverse.Domain = domain
+	tempReverse.Ip = Ip
+	tempReverse.Qtype = Qtype
 	//记录总边的个数  Edge++
 
 	if value, ok := g.GraphMap[temp]; ok {
@@ -168,7 +193,7 @@ func (g *GraphStruct) NodeNum(domain string, Qtype uint16, Ip string) (Nodenum i
 		value.ID = g.GetNum()
 		//fmt.Println("value.IDKKKKKKKKKKKKK", GetNum(), value.ID)
 
-		g.GraphReverse[value.ID] = temp
+		g.GraphReverse[value.ID] = tempReverse
 		value.flag = 0 //该节点未访问
 		g.GraphMap[temp] = value
 		return value.ID

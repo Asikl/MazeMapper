@@ -6,6 +6,7 @@ import (
 	"hello/pkg/Cache"
 	"os"
 	"sync"
+	"time"
 
 	"hello/pkg/DrawGraph"
 	"hello/pkg/Graph"
@@ -27,7 +28,6 @@ func Total(domain string, sy *sync.WaitGroup) {
 	_, err := dig.Trace(domain, dns.TypeA, &gg, &cc) //dig +trace
 
 	//tempmap, err := dig.TraceIP(domain)
-
 	//_, err := dig.RRquery(domain)
 	if err != nil {
 		fmt.Println(err)
@@ -63,7 +63,7 @@ func Total(domain string, sy *sync.WaitGroup) {
 }
 
 func main() {
-
+	start := time.Now() // 记录开始时间
 	// 打开文本文件,读取txt
 	var domain = make([]string, 0)
 	file, err := os.Open("example.txt")
@@ -74,38 +74,13 @@ func main() {
 	// 使用bufio.NewReader创建缓冲读取器
 	scanner := bufio.NewScanner(file)
 	// 逐行读取文件内容
-
-	// 逐行读取文件内容
 	for scanner.Scan() {
 		// 获取扫描到的一行文本
 		line := scanner.Text()
 
 		// 打印读取到的一行文本
-		//fmt.Println(line)
 		domain = append(domain, line)
 	}
-
-	// 打开Excel文件
-
-	// excelFile, err := excelize.OpenFile("Book1.xlsx")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-
-	// // 遍历所有工作表
-	// for _, sheet := range excelFile.Sheet[0] {
-	// 	fmt.Println("Sheet Name:", sheet.Name)
-
-	// 	// 遍历每一行
-	// 	for _, row := range sheet.Rows {
-	// 		// 只读取第一列的数据
-	// 		cell := row.Cells[0]
-	// 		fmt.Println("Value:", cell.String())
-	// 		domain = append(domain, cell)
-	// 	}
-	// }
-
 	var wg sync.WaitGroup
 	fmt.Println(len(domain), " ", domain)
 	wg.Add(len(domain))
@@ -114,4 +89,6 @@ func main() {
 		go Total(value, &wg)
 	}
 	wg.Wait()
+	elapsed := time.Since(start) // 计算经过的时间
+	fmt.Println("程序运行时间：", elapsed)
 }

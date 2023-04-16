@@ -57,6 +57,42 @@ func Visual(domain string, kk *Graph.GraphStruct) {
 		//fmt.Print(v, " -> ")
 		aborted := graph.Sort(g).Visit(v, func(w int, c int64) (skip bool) {
 			//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+
+			switch kk.GraphReverse[w].Flag {
+			case Graph.LeaveANode:
+				str := fmt.Sprintf("%d", w)
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "blue" + "];\n"
+				dot += str1
+				return
+			case Graph.LeaveAAAANode:
+				str := fmt.Sprintf("%d", w)
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "blue" + "];\n"
+				dot += str1
+				return
+			case Graph.LeaveCNAMENode:
+				str := fmt.Sprintf("%d", w)
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "green" + "];\n"
+				dot += str1
+				return
+			case Graph.NsNotGlueIPNode:
+				str := fmt.Sprintf("%d", w)
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "yellow" + "];\n"
+				dot += str1
+				return
+			}
+
 			switch w {
 			case Graph.RefusedNode:
 				str := "Refused"
@@ -117,39 +153,9 @@ func Visual(domain string, kk *Graph.GraphStruct) {
 				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
 				str1 := str + " [" + "color=" + "red" + "];\n"
 				dot += str1
-
-			case Graph.LeaveANode:
-				str := "ARecord"
-				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
-				//node1 [label="Node 1", color="blue"];
-				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
-				str1 := str + " [" + "color=" + "blue" + "];\n"
-				dot += str1
-			case Graph.LeaveAAAANode:
-				str := "AAAARecord"
-				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
-				//node1 [label="Node 1", color="blue"];
-				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
-				str1 := str + " [" + "color=" + "blue" + "];\n"
-				dot += str1
-
 			default:
 				dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
 			}
-
-			// if w == Graph.RefusedNode {
-			// 	str := "Refused"
-			// 	dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
-			// 	//node1 [label="Node 1", color="blue"];
-			// 	//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
-			// 	str1 := str + " [" + "color=" + "red" + "];\n"
-			// 	dot += str1
-
-			// } else {
-			// 	dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
-			// }
-			//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
-			//fmt.Print(w, "  ")
 			return
 		})
 		if aborted {
