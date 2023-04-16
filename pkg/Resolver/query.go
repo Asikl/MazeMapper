@@ -38,6 +38,7 @@ func (d *Dig) Exchange(m *dns.Msg) (msg1 *dns.Msg, err1 error, num int) {
 		if err == nil {
 			return msg, err, num
 		}
+		// dns.Exchange()
 	}
 	return msg, err, num
 }

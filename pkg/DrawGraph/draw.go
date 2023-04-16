@@ -153,6 +153,14 @@ func Visual(domain string, kk *Graph.GraphStruct) {
 				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
 				str1 := str + " [" + "color=" + "red" + "];\n"
 				dot += str1
+
+			case Graph.NsNotGlueIPNode: //NSnotglueIP
+				str := fmt.Sprintf("%d", w)
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "fontcolor =" + "red" + "];\n"
+				dot += str1
 			default:
 				dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
 			}
