@@ -12,5 +12,5 @@ We take **<domain,qtype,Ip>** as the key value of each node in the graph, differ
 **3.** **Blue：** Answer   A/AAAA  
 **4.** **Red：** Error  
 For different errors, we explicitly mark them in the nodes，such as **Timeout**,**Refused**,**NameError**,**Corrupt**,**IPerror**,**NotImplemented**,**IDMisMatch**,**NoNsrecord** and so on.   
-具体如下图所示：
+生成的域名解析依赖图如下图所示：
 ![Alt text](cover.png)
