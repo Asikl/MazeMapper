@@ -127,7 +127,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				//fmt.Println("NOERROR")
 				cc.AddERROR0()
 			case 1:
-				fmt.Println("出现错误  格式错误")
+				fmt.Println("出现错误  格式错误", domain)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				gg.SetRerverseflag(nodenum, Graph.CorruptNode)
 				gg.AddNode(nodenum, Graph.CorruptNode)
@@ -135,7 +135,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				cc.AddERROR1()
 				return nil, nil
 			case 2:
-				fmt.Println("出现错误  Server Failure")
+				fmt.Println("出现错误  Server Failure", domain)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				gg.AddNode(nodenum, Graph.ServerfailureNode)
 				gg.SetRerverseflag(nodenum, Graph.ServerfailureNode)
@@ -143,7 +143,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				cc.AddERROR2()
 				return nil, nil
 			case 3:
-				fmt.Println("出现错误  Name Error")
+				fmt.Println("出现错误  Name Error", domain)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				gg.AddNode(nodenum, Graph.NameErrorNode)
 				gg.SetRerverseflag(nodenum, Graph.NameErrorNode)
@@ -151,7 +151,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				cc.AddERROR3()
 				return nil, nil
 			case 4:
-				fmt.Println("出现错误  不支持查询类型")
+				fmt.Println("出现错误  不支持查询类型", domain)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				gg.SetRerverseflag(nodenum, Graph.NotImplementedNode)
 				gg.AddNode(nodenum, Graph.NotImplementedNode)
@@ -159,7 +159,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				cc.AddERROR4()
 				return nil, nil
 			case 5:
-				fmt.Println("出现错误  Refused")
+				fmt.Println("出现错误  Refused", domain)
 
 				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
 				gg.SetRerverseflag(nodenum, Graph.RefusedNode)
@@ -177,7 +177,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				//fmt.Println("==================================")
 				servers = servers[:0]
 				if len(msg.Ns) == 0 {
-					fmt.Println("没有NS记录XXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+					fmt.Println("没有NS记录XXXXXXXXXXXXXXXXXXXXXXXXXXXX", domain)
 					nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
 					gg.SetRerverseflag(nodenum, Graph.NoNsrecordNode)
 					gg.AddNode(nodenum, Graph.NoNsrecordNode)
@@ -204,7 +204,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				//fmt.Println("MSG======:", msg)
 				//处理NS记录不附带IP的情况
 				if len(servers) == 0 {
-					fmt.Println("Not glue IP!")
+					//fmt.Println("Not glue IP!")
 					NsNotGlueIP = NsNotGlueIP[:0]
 					for _, v := range msg.Ns { //通过range可以直接得到数组元素
 						ns, ok := v.(*dns.NS) //ok为bool，判断是否为该类型
@@ -314,7 +314,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 						tempnodenum := gg.NodeNum(domain, msgType, ns.A.String())
 						*GetIP = append(*GetIP, ns.A.To16().String())
 						//fmt.Println("*GetIP", ns.A.To16().String(), *GetIP)
-						fmt.Println("打印A记录", ns.A, domain, tempnodenum)
+						//fmt.Println("打印A记录", ns.A, domain, tempnodenum)
 						gg.AddNode(nodenum, tempnodenum)
 						gg.SetRerverseflag(tempnodenum, Graph.LeaveANode)
 						//gg.AddNode(tempnodenum, Graph.LeaveANode)
@@ -324,7 +324,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 					//打印结果AAAA记录
 					if value.Header().Rrtype == dns.TypeAAAA {
 						ns, _ := value.(*dns.AAAA)
-						fmt.Println("打印AAAA记录", ns.AAAA, domain)
+						//fmt.Println("打印AAAA记录", ns.AAAA, domain)
 						*GetIP = append(*GetIP, ns.AAAA.To16().String())
 						//fmt.Println("*GetIP", ns.AAAA.To16().String(), *GetIP)
 						nodenum := gg.NodeNum(domain, dns.TypeA, server)
@@ -352,12 +352,12 @@ func (d *Dig) Trace(domain string, Qtype uint16, gg *Graph.GraphStruct, cc *Cach
 
 	GetIP := make([]string, 0)
 	var trace = make([]TraceResponse, 0)
-	for index, value := range root46servers {
-		fmt.Println("ROOT：", index)
+	for _, value := range root46servers {
+		//fmt.Println("ROOT：", index)
 
 		//画图
 		num := gg.NodeNum(domain, Qtype, value)
-		fmt.Println("ROOTnum：", num, domain, Qtype, value)
+		//fmt.Println("ROOTnum：", num, domain, Qtype, value)
 		gg.AddNode(0, num)
 		d.Resolver(domain, dns.TypeA, value, gg, cc, &GetIP)
 

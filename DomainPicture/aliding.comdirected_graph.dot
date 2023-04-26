@@ -55,10 +55,10 @@ digraph G {
 	2 -> 29;
 	3 -> 28;
 	3 -> 29;
-	4 -> 28;
-	4 -> 29;
-	5 -> 28;
-	5 -> 29;
+	4 -> "Timeout";
+Timeout [color=red];
+	5 -> "Timeout";
+Timeout [color=red];
 	6 -> 28;
 	6 -> 29;
 	7 -> 28;

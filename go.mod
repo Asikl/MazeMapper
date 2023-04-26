@@ -21,6 +21,7 @@ require (
 	// github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/gonum/graph v0.0.0-20190426092945-678096d81a4b
 	github.com/miekg/dns v1.1.53
+	github.com/panjf2000/ants v1.3.0
 	github.com/xuri/excelize/v2 v2.7.1
 	golang.org/x/image v0.6.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
