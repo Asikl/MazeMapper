@@ -3,6 +3,8 @@ package Cache
 import (
 	// "github.com/miekg/dns"
 	"fmt"
+	"log"
+	"os"
 )
 
 type CacheStruct struct {
@@ -27,7 +29,7 @@ type ERROR struct {
 	ERROR0 int //没有错误查询
 	ERROR1 int //格式错误
 	ERROR2 int //Server failure
-	ERROR3 int //Name Error
+	ERROR3 int //NXDOMAIN
 	ERROR4 int //Not Implemented
 	ERROR5 int //Refused
 	ERROR6 int //time out
@@ -183,4 +185,13 @@ func (c *CacheStruct) Has(domain string, server string, Qtype uint16) (flag bool
 
 func (c *CacheStruct) Dump() {
 	fmt.Println(c.cacheFIX)
+}
+
+func WriteTimeout(domain string, file os.File) {
+	//str := domain + '\t'
+	str := fmt.Sprintf("\"%s\" \n", domain)
+	if _, err := file.WriteString(str); err != nil {
+		log.Fatal(err)
+	}
+
 }

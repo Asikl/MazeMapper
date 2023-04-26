@@ -11,7 +11,7 @@ const (
 	NoVisit        = 0
 	Corrupt        = 1
 	Serverfailure  = 2
-	NameError      = 3
+	NXDOMAIN       = 3
 	NotImplemented = 4
 	Refused        = 5
 	Timeout        = 6
@@ -26,7 +26,7 @@ const (
 
 	CorruptNode        = 980
 	ServerfailureNode  = 981
-	NameErrorNode      = 982
+	NXDOMAINNode       = 982
 	NotImplementedNode = 983
 	RefusedNode        = 984
 	TimeoutNode        = 985

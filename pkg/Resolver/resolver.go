@@ -143,10 +143,10 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				cc.AddERROR2()
 				return nil, nil
 			case 3:
-				fmt.Println("出现错误  Name Error", domain)
+				fmt.Println("出现错误  NXDOMAIN", domain)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
-				gg.AddNode(nodenum, Graph.NameErrorNode)
-				gg.SetRerverseflag(nodenum, Graph.NameErrorNode)
+				gg.AddNode(nodenum, Graph.NXDOMAINNode)
+				gg.SetRerverseflag(nodenum, Graph.NXDOMAINNode)
 				//gg.Setflag(domain, msgType, server, Graph.NameError)
 				cc.AddERROR3()
 				return nil, nil
