@@ -12,9 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/panjf2000/ants"
-
 	"github.com/miekg/dns"
+	"github.com/panjf2000/ants"
 )
 
 func Total(domain string, sy *sync.WaitGroup) {
@@ -45,12 +44,12 @@ func Total(domain string, sy *sync.WaitGroup) {
 	//gg.Dump()
 	//gg.DumpGraphMap()
 	fmt.Println("----")
-	DrawGraph.Visual(domain, &gg)
+	DrawGraph.Visual0(domain, &gg)
 	//DrawGraph.Visual1(domain, &gg)
 	//DrawGraph.Test()
 	fmt.Println("+++")
 	//Graph.DumpGraphReverse()
-	DrawGraph.Visual1(domain, &gg)
+	//DrawGraph.Visual1(domain, &gg)
 	//DrawPicture.DrawGraph()
 	str := fmt.Sprintf("\"%s\" \n", domain)
 	//加锁
@@ -168,7 +167,7 @@ func main() {
 	wg := sync.WaitGroup{}
 
 	//申请一个协程池对象
-	pool, _ := ants.NewPool(100)
+	pool, _ := ants.NewPool(2000)
 	//关闭协程池
 	defer pool.Release()
 	//fmt.Println("POOL", pool.Running())

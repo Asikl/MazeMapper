@@ -42,6 +42,150 @@ type DrawStruct struct {
 	path string
 }
 
+// Visua0只统计结果不画图
+func Visual0(domain string, kk *Graph.GraphStruct) {
+
+	//Path := "\"DomainPicture\""
+	Path := "./1w/"
+	g := kk.Domaingraph
+	// 将有向图导出为 Dot 格式的图形描述
+	dot := "digraph G {\n"
+	// 遍历节点
+	for v := 0; v < g.Order(); v++ {
+		// if v > Graph.Num {
+		// 	break
+		// }
+		//fmt.Print(v, " -> ")
+		aborted := graph.Sort(g).Visit(v, func(w int, c int64) (skip bool) {
+			//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+
+			switch kk.GraphReverse[w].Flag {
+			case Graph.LeaveANode:
+				str := fmt.Sprintf("%d", w)
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "blue" + "];\n"
+				dot += str1
+				return
+			case Graph.LeaveAAAANode:
+				str := fmt.Sprintf("%d", w)
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "blue" + "];\n"
+				dot += str1
+				return
+			case Graph.LeaveCNAMENode:
+				str := fmt.Sprintf("%d", w)
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "green" + "];\n"
+				dot += str1
+				return
+			case Graph.NsNotGlueIPNode:
+				str := fmt.Sprintf("%d", w)
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "yellow" + "];\n"
+				dot += str1
+				return
+			}
+
+			switch w {
+			case Graph.RefusedNode:
+				str := "Refused"
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "red" + "];\n"
+				dot += str1
+			case Graph.NXDOMAINNode:
+				str := "NXDOMAIN"
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "red" + "];\n"
+				dot += str1
+			case Graph.TimeoutNode:
+				str := "Timeout"
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "red" + "];\n"
+				dot += str1
+
+			case Graph.CorruptNode:
+				str := "Corrupt"
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "red" + "];\n"
+				dot += str1
+
+			case Graph.IPerrorNode:
+				str := "IPerror"
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "red" + "];\n"
+				dot += str1
+			case Graph.NotImplementedNode:
+				str := "NotImplemented"
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "red" + "];\n"
+				dot += str1
+
+			case Graph.IDMisMatchNode:
+				str := "IDMisMatch"
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "red" + "];\n"
+				dot += str1
+			case Graph.NoNsrecordNode:
+				str := "NoNsrecord"
+				dot += fmt.Sprintf("\t%d -> \"%s\";\n", v, str)
+				//node1 [label="Node 1", color="blue"];
+				//dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+				str1 := str + " [" + "color=" + "red" + "];\n"
+				dot += str1
+
+			default:
+				dot += fmt.Sprintf("\t%d -> %d;\n", v, w)
+			}
+			return
+		})
+		if aborted {
+			break
+		}
+		//fmt.Println()
+	}
+	dot += "}"
+	//fmt.Println(dot)
+	// 创建一个文件，将 Dot 格式的图形描述写入该文件
+	//fmt.Println("Hello")
+
+	str := Path + domain + ".dot"
+
+	file, err := os.Create(str)
+	if err != nil {
+		log.Fatal(err)
+		fmt.Println(err)
+	}
+	defer file.Close()
+
+	if _, err := file.WriteString(dot); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("已生成 directed_graph.dot 文件")
+}
+
 func Visual(domain string, kk *Graph.GraphStruct) {
 	fmt.Println("开始画图")
 	//Path := "\"DomainPicture\""
