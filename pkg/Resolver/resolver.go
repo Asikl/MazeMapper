@@ -46,10 +46,11 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 	//死循环
 	for {
 		if err := d.SetDNS(server); err != nil {
-			fmt.Println("IP本身有问题", err)
+			//fmt.Println("IP本身有问题", err)
 			nodenum := gg.NodeNum(domain, dns.TypeA, server)
 			gg.SetRerverseflag(nodenum, Graph.IPerrorNode)
 			gg.AddNode(nodenum, Graph.IPerrorNode)
+			cc.AddERROR9()
 			gg.Setflag(domain, msgType, distination, 1)
 			return nil, nil
 		}
@@ -87,7 +88,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
 				gg.AddNode(nodenum, Graph.TimeoutNode)
-				fmt.Println(domain, server)
+				//fmt.Println(domain, server)
 			case 62:
 				gg.Setflag(domain, msgType, server, Graph.Timeout)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
@@ -98,7 +99,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
 				gg.AddNode(nodenum, Graph.TimeoutNode)
-				fmt.Println("TIMEOUT!!!")
+				//fmt.Println("TIMEOUT!!!")
 				gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
 			case 9:
 				gg.Setflag(domain, msgType, server, Graph.IDMisMatch)
@@ -111,7 +112,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 			if err != nil {
 				cc.AddERROR6()
 				//fmt.Println("出现错误  ", fmt.Errorf("%v", err))
-				fmt.Println("出现错误TIMEOUT!!!!!!!!!!!", server, domain)
+				//fmt.Println("出现错误TIMEOUT!!!!!!!!!!!", server, domain)
 				// gg.Setflag(domain, msgType, server, Graph.Timeout)
 				// nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				// gg.SetRerverseflag(nodenum, Graph.TimeoutNode)
@@ -127,7 +128,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				//fmt.Println("NOERROR")
 				cc.AddERROR0()
 			case 1:
-				fmt.Println("出现错误  格式错误", domain)
+				//fmt.Println("出现错误  格式错误", domain)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				gg.SetRerverseflag(nodenum, Graph.CorruptNode)
 				gg.AddNode(nodenum, Graph.CorruptNode)
@@ -135,7 +136,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				cc.AddERROR1()
 				return nil, nil
 			case 2:
-				fmt.Println("出现错误  Server Failure", domain)
+				//fmt.Println("出现错误  Server Failure", domain)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				gg.AddNode(nodenum, Graph.ServerfailureNode)
 				gg.SetRerverseflag(nodenum, Graph.ServerfailureNode)
@@ -143,7 +144,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				cc.AddERROR2()
 				return nil, nil
 			case 3:
-				fmt.Println("出现错误  NXDOMAIN", domain)
+				//fmt.Println("出现错误  NXDOMAIN", domain)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				gg.AddNode(nodenum, Graph.NXDOMAINNode)
 				gg.SetRerverseflag(nodenum, Graph.NXDOMAINNode)
@@ -151,7 +152,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				cc.AddERROR3()
 				return nil, nil
 			case 4:
-				fmt.Println("出现错误  不支持查询类型", domain)
+				//fmt.Println("出现错误  不支持查询类型", domain)
 				nodenum := gg.NodeNum(domain, dns.TypeA, server)
 				gg.SetRerverseflag(nodenum, Graph.NotImplementedNode)
 				gg.AddNode(nodenum, Graph.NotImplementedNode)
@@ -159,16 +160,31 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				cc.AddERROR4()
 				return nil, nil
 			case 5:
-				fmt.Println("出现错误  Refused", domain)
+				//fmt.Println("出现错误  Refused", domain)
 
 				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
 				gg.SetRerverseflag(nodenum, Graph.RefusedNode)
 				gg.AddNode(nodenum, Graph.RefusedNode)
-				fmt.Println(domain, server)
+				//fmt.Println(domain, server)
 				//gg.Setflag(domain, msgType, server, Graph.Refused)
 				cc.AddERROR5()
 				return nil, nil
 			}
+
+			if msg.MsgHdr.RecursionAvailable {
+				//fmt.Println("出现错误  Hijack", domain)
+
+				nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
+				gg.SetRerverseflag(nodenum, Graph.HijackNode)
+				gg.AddNode(nodenum, Graph.HijackNode)
+				//fmt.Println(domain, server)
+				//gg.Setflag(domain, msgType, server, Graph.Refused)
+				cc.AddERROR8()
+				return nil, nil
+
+			}
+
+			//fmt.Printf("msg.MsgHdr.String(): %v\n", msg.MsgHdr.String())
 			//answernum:=msg.MsgHdr.
 
 			//fmt.Println("我想要的东西", msg.Answer)
@@ -177,10 +193,11 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 				//fmt.Println("==================================")
 				servers = servers[:0]
 				if len(msg.Ns) == 0 {
-					fmt.Println("没有NS记录XXXXXXXXXXXXXXXXXXXXXXXXXXXX", domain)
+					//fmt.Println("没有NS记录XXXXXXXXXXXXXXXXXXXXXXXXXXXX", domain)
 					nodenum := gg.NodeNum(gg.Domain, dns.TypeA, server)
 					gg.SetRerverseflag(nodenum, Graph.NoNsrecordNode)
 					gg.AddNode(nodenum, Graph.NoNsrecordNode)
+					cc.AddERROR7()
 					return nil, nil
 				}
 				for _, value := range msg.Extra { //通过range可以直接得到数组元素
@@ -213,7 +230,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 							NsNotGlueIP = append(NsNotGlueIP, ns.Ns)
 						}
 					}
-					fmt.Println("NSNOTGLUEIP", NsNotGlueIP, domain)
+					//fmt.Println("NSNOTGLUEIP", NsNotGlueIP, domain)
 
 					//====================把NS不带IP的记录也放到缓存里面,缓存特殊标记一下
 					var cachevalue Cache.Cachevalue
@@ -261,7 +278,7 @@ func (d *Dig) Resolver(domain string, msgType uint16, distination string, gg *Gr
 						tempnodenum := gg.NodeNum(domain, dns.TypeA, tempserver)
 
 						if nodenum == tempnodenum {
-							fmt.Println("nodenum==tempnodenum", msg)
+							//fmt.Println("nodenum==tempnodenum", msg)
 							gg.SetRerverseflag(nodenum, Graph.OneCircleNode)
 						}
 						gg.AddNode(nodenum, tempnodenum)

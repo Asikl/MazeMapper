@@ -22,22 +22,25 @@ const (
 	LeaveA         = 10
 	LeaveAAAA      = 11
 	LeaveCNAME     = 12
-	Common         = 100
 
-	CorruptNode        = 980
-	ServerfailureNode  = 981
-	NXDOMAINNode       = 982
-	NotImplementedNode = 983
-	RefusedNode        = 984
-	TimeoutNode        = 985
-	NoNsrecordNode     = 986
-	NsNotGlueIPNode    = 987
-	IPerrorNode        = 988
-	IDMisMatchNode     = 989
-	LeaveANode         = 990
-	LeaveAAAANode      = 991
-	LeaveCNAMENode     = 992
-	OneCircleNode      = 993
+	Hijack = 13
+	Common = 100
+
+	HijackNode         = 1979
+	CorruptNode        = 1980
+	ServerfailureNode  = 1981
+	NXDOMAINNode       = 1982
+	NotImplementedNode = 1983
+	RefusedNode        = 1984
+	TimeoutNode        = 1985
+	NoNsrecordNode     = 1986
+	NsNotGlueIPNode    = 1987
+	IPerrorNode        = 1988
+	IDMisMatchNode     = 1989
+	LeaveANode         = 1990
+	LeaveAAAANode      = 1991
+	LeaveCNAMENode     = 1992
+	OneCircleNode      = 1993
 )
 
 type GraphStruct struct {
@@ -46,6 +49,7 @@ type GraphStruct struct {
 	GraphMap     map[Key]Value
 	GraphReverse map[int]KeyRevserse
 	Domaingraph  *graph.Mutable
+	Result       map[string]string
 }
 
 type Key struct {
@@ -88,7 +92,8 @@ func Init(g *GraphStruct, Domain string) {
 	g.Domain = Domain
 	g.GraphMap = make(map[Key]Value, 0)
 	g.GraphReverse = make(map[int]KeyRevserse, 0)
-	g.Domaingraph = graph.New(1000)
+	g.Result = make(map[string]string, 0)
+	g.Domaingraph = graph.New(2000)
 
 	Beginkey.Domain = ""
 	BeginValue.ID = 0

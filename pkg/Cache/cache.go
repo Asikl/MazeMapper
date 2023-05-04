@@ -34,6 +34,9 @@ type ERROR struct {
 	ERROR5 int //Refused
 	ERROR6 int //time out
 	ERROR7 int //数据包中没有NS记录，无法继续进行下去
+	ERROR8 int //hijack\
+	ERROR9 int //IPerror
+
 	//ERROR8 int
 }
 
@@ -129,6 +132,26 @@ func (c *CacheStruct) AddERROR7() {
 	c.DomainERROR.ERROR7++
 }
 
+func (c *CacheStruct) ERROR8Init() {
+	c.DomainERROR.ERROR8 = 0
+}
+func (c *CacheStruct) GetERROR8() (num int) {
+	return c.DomainERROR.ERROR8
+}
+func (c *CacheStruct) AddERROR8() {
+	c.DomainERROR.ERROR8++
+}
+
+func (c *CacheStruct) ERROR9Init() {
+	c.DomainERROR.ERROR9 = 0
+}
+func (c *CacheStruct) GetERROR9() (num int) {
+	return c.DomainERROR.ERROR9
+}
+func (c *CacheStruct) AddERROR9() {
+	c.DomainERROR.ERROR9++
+}
+
 func (c *CacheStruct) EdegeInit() {
 	c.DomainERROR.Edge = 0
 }
@@ -150,10 +173,11 @@ func Init(domain string, c *CacheStruct) {
 	c.ERROR5Init()
 	c.ERROR6Init()
 	c.ERROR7Init()
+	c.ERROR8Init()
+	c.ERROR9Init()
 }
 
 func (c *CacheStruct) Add(domain string, server string, Qtype uint16, value Cachevalue) {
-
 	var temp Cachekey
 	temp.CacheDomain = domain
 	temp.CacheIp = server

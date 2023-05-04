@@ -4,7 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"hello/pkg/Cache"
-	"hello/pkg/DrawGraph"
+
+	//"hello/pkg/DrawGraph"
 	"hello/pkg/Graph"
 	"hello/pkg/Resolver"
 	"log"
@@ -16,9 +17,10 @@ import (
 	"github.com/panjf2000/ants"
 )
 
-func Total(domain string, sy *sync.WaitGroup) {
+func Total(domain string) (result map[string]string) {
 	//fmt.Println("Hlol")
-	var rwm sync.RWMutex
+	// var rwm sync.RWMutex
+
 	var dig Resolver.Dig
 	var gg Graph.GraphStruct
 	var cc Cache.CacheStruct
@@ -36,114 +38,66 @@ func Total(domain string, sy *sync.WaitGroup) {
 	}
 	//os.WriteFile()
 
-	fmt.Println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-	fmt.Println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+	//fmt.Println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+	//fmt.Println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 	//Cache.Dump()
 
-	//fmt.Println("[                                  ]")
-	//gg.Dump()
-	//gg.DumpGraphMap()
-	fmt.Println("----")
-	DrawGraph.Visual0(domain, &gg)
-	//DrawGraph.Visual1(domain, &gg)
+	//fmt.Println("----")
+
+	//DrawGraph.Visual(domain, &gg) //生成图，图中节点为数字
+	//DrawGraph.Visual0(domain, &gg) //只统计结果，不生产图
+	//DrawGraph.Visual1(domain, &gg)  //生成图，节点为真实数据<domain,qtype,Ip>
 	//DrawGraph.Test()
 	fmt.Println("+++")
-	//Graph.DumpGraphReverse()
-	//DrawGraph.Visual1(domain, &gg)
+	//gg.DumpGraphReverse()
 	//DrawPicture.DrawGraph()
-	str := fmt.Sprintf("\"%s\" \n", domain)
-	//加锁
-	rwm.Lock()
+	//str := fmt.Sprintf("\"%s\" \n", domain)
+
 	if cc.GetERROR1() != 0 {
 		//写入文件
-
-		// 打开文件，如果文件不存在则创建
-		file, err := os.OpenFile("Corrupt.txt", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-
-		// 写入新的内容到文件末尾
-		file.WriteString(str)
+		gg.Result["./Result/Corrupt.txt"] = gg.Domain + "\n"
 	}
-	if cc.GetERROR1() != 0 {
+	if cc.GetERROR2() != 0 {
 		//写入文件
 		// 打开文件，如果文件不存在则创建
-		file, err := os.OpenFile("./Result/Serverfailure.txt", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-		// 写入新的内容到文件末尾
-		file.WriteString(str)
+		gg.Result["./Result/Serverfailure.txt"] = gg.Domain + "\n"
 	}
 	if cc.GetERROR3() != 0 {
 		// 打开文件，如果文件不存在则创建
-		file, err := os.OpenFile("./Result/NXDOMAIN.txt", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-		// 写入新的内容到文件末尾
-		file.WriteString(str)
+		gg.Result["./Result/NXDOMAIN.txt"] = gg.Domain + "\n"
+
 	}
 	if cc.GetERROR4() != 0 {
 		//写入文件
-		file, err := os.OpenFile("./Result/NotImplmented.txt", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-		// 写入新的内容到文件末尾
-		file.WriteString(str)
+		gg.Result["./Result/NotImplmented.txt"] = gg.Domain + "\n"
+
 	}
 	if cc.GetERROR5() != 0 {
 		//写入文件
-		file, err := os.OpenFile("./Result/Refused.txt", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-		// 写入新的内容到文件末尾
-		file.WriteString(str)
+		gg.Result["./Result/Refused.txt"] = gg.Domain + "\n"
 	}
 	if cc.GetERROR6() != 0 {
 		//写入文件
 
 		//写入文件
-		file, err := os.OpenFile("./Result/Timeout.txt", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-		// 写入新的内容到文件末尾
-		file.WriteString(str)
-		//os.WriteFile("Timeout.txt", []byte(str), 0664)
+		gg.Result["./Result/Timeout.txt"] = gg.Domain + "\n"
+
 	}
 	if cc.GetERROR7() != 0 {
 		//写入文件
-		file, err := os.OpenFile("./Result/NoNsRecord.txt", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
-		if err != nil {
-			panic(err)
-		}
-		defer file.Close()
-		// 写入新的内容到文件末尾
-		file.WriteString(str)
+		gg.Result["./Result/NoNsRecord.txt"] = gg.Domain + "\n"
+
 	}
-	//解锁
-	rwm.Unlock()
-	// fmt.Println("没有错误查询数量：", cc.GetERROR0())
-	// fmt.Println("Corrept：", cc.GetERROR1())
-	// fmt.Println("Server failer：", cc.GetERROR2())
-	// fmt.Println("Name Error：", cc.GetERROR3())
-	// fmt.Println("Not implemented：", cc.GetERROR4())
-	// fmt.Println("Refused：", cc.GetERROR5())
-	// fmt.Println("Time out：", cc.GetERROR6())
-	// fmt.Println("NoNsRecord：", cc.GetERROR7())
-	// fmt.Println("图中边的个数：", cc.GetEdge())
-	// fmt.Println("图中节点个数：", cc.GetNum())
-	sy.Done()
+
+	if cc.GetERROR8() != 0 {
+		//写入文件
+		gg.Result["./Result/Hijack.txt"] = gg.Domain + "\n"
+	}
+	if cc.GetERROR9() != 0 {
+		//写入文件
+		gg.Result["./Result/IPerror.txt"] = gg.Domain + "\n"
+	}
+	return gg.Result
 }
 
 func main() {
@@ -151,7 +105,14 @@ func main() {
 	CreateFile()
 	start := time.Now() // 记录开始时间
 	// 打开文本文件,读取txt
-	var domain = make([]string, 0)
+
+	wg := sync.WaitGroup{}
+	m := sync.Mutex{}
+	//var mu sync.Mutex
+	//申请一个协程池对象
+	pool, _ := ants.NewPool(2000)
+	//关闭协程池
+	defer pool.Release()
 	file, err := os.Open("example.txt")
 	if err != nil {
 		fmt.Println("文件读取错误", err)
@@ -160,32 +121,43 @@ func main() {
 	// 使用bufio.NewReader创建缓冲读取器
 	scanner := bufio.NewScanner(file)
 	// 逐行读取文件内容
+
+	var num = 1
 	for scanner.Scan() {
 		line := scanner.Text()
-		domain = append(domain, line)
-	}
-	wg := sync.WaitGroup{}
+		//domain = append(domain, line)
+		num++
 
-	//申请一个协程池对象
-	pool, _ := ants.NewPool(2000)
-	//关闭协程池
-	defer pool.Release()
-	//fmt.Println("POOL", pool.Running())
-	//var wg sync.WaitGroup
-	fmt.Println(len(domain), " ", domain)
-	wg.Add(len(domain))
-	for _, value := range domain {
-		fmt.Println("协程", value)
+		fmt.Println("协程", line, "           num:", num)
+		wg.Add(1)
 		pool.Submit(func() {
 			// 调用 processData 函数处理数据
-			Total(value, &wg)
+			defer wg.Done()
+			map1 := Total(line)
+			m.Lock()
+			WriteResult(map1)
+			m.Unlock()
 		})
-		fmt.Println("POOLOOOOOOOOOOOOOOOOOOOOOO", pool.Running())
+		//fmt.Println("POOLOOOOOOOOOOOOOOOOOOOOOO", pool.Running())
 	}
 	wg.Wait()
 
 	elapsed := time.Since(start) // 计算经过的时间
 	fmt.Println("程序运行时间：", elapsed)
+}
+
+func WriteResult(str map[string]string) {
+
+	for index, value := range str {
+		file, err := os.OpenFile(index, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+		// 写入新的内容到文件末尾
+		file.WriteString(value)
+
+	}
 }
 
 func CreateFile() {
