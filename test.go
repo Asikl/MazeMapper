@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"hello/pkg/Cache"
+	"hello/pkg/DrawGraph"
 
 	//"hello/pkg/DrawGraph"
 	"hello/pkg/Graph"
@@ -44,8 +45,8 @@ func Total(domain string) (result map[string]string) {
 
 	//fmt.Println("----")
 
-	//DrawGraph.Visual(domain, &gg) //生成图，图中节点为数字
-	//DrawGraph.Visual0(domain, &gg) //只统计结果，不生产图
+	DrawGraph.Visual(domain, &gg) //生成图，图中节点为数字
+
 	//DrawGraph.Visual1(domain, &gg)  //生成图，节点为真实数据<domain,qtype,Ip>
 	//DrawGraph.Test()
 	fmt.Println("+++")
@@ -97,6 +98,13 @@ func Total(domain string) (result map[string]string) {
 		//写入文件
 		gg.Result["./Result/IPerror.txt"] = gg.Domain + "\n"
 	}
+
+	fmt.Println("       ========            ", domain, gg.GetNum())
+
+	if gg.GetNum() > 1000 {
+		gg.Result["./Result/NodeOver1000.txt"] = gg.Domain + "\n"
+	}
+
 	return gg.Result
 }
 

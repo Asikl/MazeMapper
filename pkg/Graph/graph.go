@@ -93,7 +93,7 @@ func Init(g *GraphStruct, Domain string) {
 	g.GraphMap = make(map[Key]Value, 0)
 	g.GraphReverse = make(map[int]KeyRevserse, 0)
 	g.Result = make(map[string]string, 0)
-	g.Domaingraph = graph.New(2000)
+	g.Domaingraph = graph.New(10000)
 
 	Beginkey.Domain = ""
 	BeginValue.ID = 0
