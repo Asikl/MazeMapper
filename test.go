@@ -45,7 +45,7 @@ func Total(domain string) (result map[string]string) {
 
 	//fmt.Println("----")
 
-	DrawGraph.Visual(domain, &gg) //生成图，图中节点为数字
+	DrawGraph.GetDot(domain, &gg) //生成图，图中节点为数字
 
 	//DrawGraph.Visual1(domain, &gg)  //生成图，节点为真实数据<domain,qtype,Ip>
 	//DrawGraph.Test()
@@ -101,8 +101,8 @@ func Total(domain string) (result map[string]string) {
 
 	fmt.Println("       ========            ", domain, gg.GetNum())
 
-	if gg.GetNum() > 1000 {
-		gg.Result["./Result/NodeOver1000.txt"] = gg.Domain + "\n"
+	if gg.GetNum() > 200 {
+		gg.Result["./Result/NodeOver200.txt"] = gg.Domain + "\n"
 	}
 
 	return gg.Result
@@ -121,7 +121,7 @@ func main() {
 	pool, _ := ants.NewPool(2000)
 	//关闭协程池
 	defer pool.Release()
-	file, err := os.Open("example.txt")
+	file, err := os.Open("Randomtest.txt")
 	if err != nil {
 		fmt.Println("文件读取错误", err)
 	}

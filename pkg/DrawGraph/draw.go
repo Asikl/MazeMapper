@@ -43,7 +43,7 @@ type DrawStruct struct {
 }
 
 // Visua0只统计结果不画图
-func Visual0(domain string, kk *Graph.GraphStruct) {
+func GetVariety(domain string, kk *Graph.GraphStruct) {
 
 	//Path := "\"DomainPicture\""
 	Path := "./1w/"
@@ -193,7 +193,7 @@ func Visual0(domain string, kk *Graph.GraphStruct) {
 	fmt.Println("已生成 directed_graph.dot 文件")
 }
 
-func Visual(domain string, kk *Graph.GraphStruct) {
+func GetDot(domain string, kk *Graph.GraphStruct) {
 	fmt.Println("开始画图")
 	//Path := "\"DomainPicture\""
 	Path := "./DomainPicture/"
@@ -342,18 +342,18 @@ func Visual(domain string, kk *Graph.GraphStruct) {
 		log.Fatal(err)
 	}
 
-	fmt.Println("已生成 directed_graph.dot 文件")
+	fmt.Println("已生成 ",domain,"dot 文件")
 
 	// 使用 Graphviz 将 Dot 文件渲染为图像
-	cmd := exec.Command("dot", "-Tpng", str, "-o", strr)
-	err = cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("已生成 directed_graph.png 图片")
+	// cmd := exec.Command("dot", "-Tpng", str, "-o", strr)
+	// err = cmd.Run()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("已生成 directed_graph.png 图片")
 }
 
-func Visual1(domain string, kk *Graph.GraphStruct) {
+func GetPicture(domain string, kk *Graph.GraphStruct) {
 	fmt.Println("开始画图")
 	// // // 创建一个有向图
 	g := kk.Domaingraph
