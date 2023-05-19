@@ -118,10 +118,10 @@ func main() {
 	m := sync.Mutex{}
 	//var mu sync.Mutex
 	//申请一个协程池对象
-	pool, _ := ants.NewPool(2000)
+	pool, _ := ants.NewPool(10000)
 	//关闭协程池
 	defer pool.Release()
-	file, err := os.Open("Randomtest.txt")
+	file, err := os.Open("top1_mpopular.txt")
 	if err != nil {
 		fmt.Println("文件读取错误", err)
 	}

@@ -194,7 +194,7 @@ func GetVariety(domain string, kk *Graph.GraphStruct) {
 }
 
 func GetDot(domain string, kk *Graph.GraphStruct) {
-	fmt.Println("开始画图")
+	//fmt.Println("开始画图")
 	//Path := "\"DomainPicture\""
 	Path := "./DomainPicture/"
 	g := kk.Domaingraph
@@ -329,8 +329,8 @@ func GetDot(domain string, kk *Graph.GraphStruct) {
 	//fmt.Println("Hello")
 
 	str := Path + domain + ".dot"
-	strr := Path + domain + ".png"
-	fmt.Println(str, strr)
+	//strr := Path + domain + ".png"
+	//fmt.Println(str, strr)
 	file, err := os.Create(str)
 	if err != nil {
 		log.Fatal(err)
@@ -395,7 +395,7 @@ func GetPicture(domain string, kk *Graph.GraphStruct) {
 		log.Fatal(err)
 	}
 
-	fmt.Println("已生成 directed_graph.dot 文件")
+	//fmt.Println("已生成 directed_graph.dot 文件")
 
 	// 使用 Graphviz 将 Dot 文件渲染为图像
 	cmd := exec.Command("dot", "-Tpng", str, "-o", strr)
